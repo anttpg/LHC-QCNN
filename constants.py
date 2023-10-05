@@ -1,13 +1,24 @@
 import math
 
 #Define the number of qubit weights per image in the dataset
-NUM_QUBITS = 8 # Must be a multiple of 2
+NUM_QUBITS = 2048 # Must be a multiple of 2
 
 MAX_PIXEL = 0xFFFFFF
 SIZE = (NUM_QUBITS, 1)
 
-# Original was 2, 4 for vertical line test
-SHAPE_X = 4
-SHAPE_Y = 2
-# SHAPE_X = int(math.sqrt(NUM_QUBITS))
-# SHAPE_Y = int(math.sqrt(NUM_QUBITS))
+
+#Used to define the shape of the image we will use
+def find_factors_close_to_sqrt(n):
+    for i in range(int(math.sqrt(n)), 0, -1):
+        if n % i == 0:
+            return i, n // i
+
+
+SHAPE_X, SHAPE_Y = find_factors_close_to_sqrt(NUM_QUBITS)
+
+# Ensure SHAPE_X is always >= SHAPE_Y
+if SHAPE_Y > SHAPE_X:
+    SHAPE_X, SHAPE_Y = SHAPE_Y, SHAPE_X
+    
+print("Shape X Pixels:", SHAPE_X)
+print("Shape Y Pixels:", SHAPE_Y)
