@@ -1,7 +1,11 @@
 import math
 
 #Define the number of qubit weights per image in the dataset
-NUM_QUBITS = 2048 # Must be a multiple of 2
+# Would be a 16x8 image
+NUM_QUBITS = 128 # Must be a multiple of 2
+
+#  Would be a 64x64 image
+#NUM_QUBITS = 4096 
 
 MAX_PIXEL = 0xFFFFFF
 SIZE = (NUM_QUBITS, 1)
