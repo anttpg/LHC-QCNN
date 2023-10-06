@@ -4,10 +4,10 @@ import math
 # Must be a multiple of 2
 
 # Would be a 5x4 image
-#NUM_QUBITS = 20
+NUM_QUBITS = 20
 
 # Would be a 16x8 image
-NUM_QUBITS = 8
+#NUM_QUBITS = 128
 
 #  Would be a 32x32 image
 #NUM_QUBITS = 1024
