@@ -7,7 +7,7 @@ import math
 #NUM_QUBITS = 20
 
 # Would be a 16x8 image
-NUM_QUBITS = 128
+NUM_QUBITS = 8
 
 #  Would be a 32x32 image
 #NUM_QUBITS = 1024
