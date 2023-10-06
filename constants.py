@@ -4,6 +4,9 @@ import math
 # Would be a 16x8 image
 NUM_QUBITS = 128 # Must be a multiple of 2
 
+#  Would be a 32x32 image
+#NUM_QUBITS = 1024
+
 #  Would be a 64x64 image
 #NUM_QUBITS = 4096 
 
