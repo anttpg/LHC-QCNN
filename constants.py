@@ -15,6 +15,8 @@ NUM_QUBITS = 16
 #  Would be a 64x64 image
 #NUM_QUBITS = 4096 
 
+USE_INITIAL = True
+
 MAX_PIXEL = 0xFFFFFF
 SIZE = (NUM_QUBITS, 1)
 
