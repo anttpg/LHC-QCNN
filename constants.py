@@ -1,10 +1,10 @@
 import math
 
 # Define the number of qubit weights per image in the dataset
-# Must be a multiple of 2
+# Must be a multiple of 2 
 
 # Would be a 5x4 image
-NUM_QUBITS = 20
+NUM_QUBITS = 16
 
 # Would be a 16x8 image
 #NUM_QUBITS = 128
@@ -18,6 +18,11 @@ NUM_QUBITS = 20
 MAX_PIXEL = 0xFFFFFF
 SIZE = (NUM_QUBITS, 1)
 
+DATA_PATH = "LHC_data/test_data"
+LABEL = "ant"
+
+# DATA_PATH = "cats_dogs_light/test"
+# LABEL = "dog"
 
 #Used to define the shape of the image we will use
 def find_factors_close_to_sqrt(n):
