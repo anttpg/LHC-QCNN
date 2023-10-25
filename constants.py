@@ -4,7 +4,7 @@ import math
 # Must be a multiple of 2 
 
 # Would be a 5x4 image
-NUM_QUBITS = 16
+NUM_QUBITS = 4
 
 # Would be a 16x8 image
 #NUM_QUBITS = 128
