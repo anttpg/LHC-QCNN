@@ -1,6 +1,9 @@
 
+
+% Input will a 4d vector
 function U2 = U2_Circuit_Calculator()
-    U2 = [];
+    format rat
+
 
     CnotAB = [
     1 0 0 0 ; 
@@ -10,11 +13,33 @@ function U2 = U2_Circuit_Calculator()
     ];
 
     CnotBA = [
-    0 1 0 0 ; 
     1 0 0 0 ; 
+    0 0 0 1 ; 
     0 0 1 0 ; 
-    0 0 0 1
+    0 1 0 0
     ];
+
+    theta = pi
+    phi = pi
+    lambda = 0
+    input = [0 ; 0 ; 1/sqrt(2) ; 1/sqrt(2)]
+
+    Q2_Rz = kron(eye(2), Rz(-pi/2))
+    Rz_Ry = kron(Rz(theta), Ry(phi))
+
+    Q1_Rz = kron(Rz(pi/2), eye(2))
+    Q2_Ry = kron(eye(2), Ry(lambda))
+
+
+    currentVals = Q2_Rz * input
+    currentVals = CnotBA * currentVals
+    currentVals = Rz_Ry * currentVals
+    currentVals = CnotAB * currentVals
+    currentVals = Q2_Ry * currentVals
+    currentVals = CnotBA * currentVals
+    currentVals = Q1_Rz * currentVals
+
+    return 
 end
 
 

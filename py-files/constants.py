@@ -4,7 +4,7 @@ import math
 # Must be a multiple of 2 
 
 # Would be a 5x4 image
-NUM_QUBITS = 16
+NUM_QUBITS = 4
 
 # Would be a 16x8 image
 #NUM_QUBITS = 128
@@ -21,7 +21,7 @@ MAX_ITER = 2
 MAX_PIXEL = 0xFFFFFF
 SIZE = (NUM_QUBITS, 1)
 
-DATA_PATH = "test_data"
+DATA_PATH = "py-files/test_data"
 LABEL = "ant"
 
 # DATA_PATH = "cats_dogs_light/test"
