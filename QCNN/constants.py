@@ -1,31 +1,24 @@
 import math
+from argparse import ArgumentParser
 
 # Define the number of qubit weights per image in the dataset
 # Must be a multiple of 2 
 
-# Would be a 5x4 image
-NUM_QUBITS = 16
+#For cmd arguments
+parser = ArgumentParser()
+parser.add_argument("--trained", help="with pre-trained weights", action="store_true", default= False)
+parser.add_argument("--iterations",  help="set the num iterations to run", type=int, default=30)
+parser.add_argument("--qubits",  help="override the default number of qubits to run (16)", type=int, default=4)
+ARGS = parser.parse_args()
 
-# Would be a 16x8 image
-#NUM_QUBITS = 128
 
-#  Would be a 32x32 image
-#NUM_QUBITS = 1024
-
-#  Would be a 64x64 image
-#NUM_QUBITS = 4096 
-
-USE_INITIAL = True
-
-MAX_ITER = 2
 MAX_PIXEL = 0xFFFFFF
-SIZE = (NUM_QUBITS, 1)
-
-DATA_PATH = "py-files"
+DATA_PATH = "QCNN"
 LABEL = "ant"
 
-# DATA_PATH = "cats_dogs_light/test"
-# LABEL = "dog"
+NUM_QUBITS = ARGS.qubits
+MAX_ITER = ARGS.iterations
+USE_TRAINED = ARGS.trained
 
 #Used to define the shape of the image we will use
 def find_factors_close_to_sqrt(n):
@@ -33,12 +26,14 @@ def find_factors_close_to_sqrt(n):
         if n % i == 0:
             return i, n // i
 
-
+SIZE = (NUM_QUBITS, 1)
 SHAPE_X, SHAPE_Y = find_factors_close_to_sqrt(NUM_QUBITS)
 
 # Ensure SHAPE_X is always >= SHAPE_Y
 if SHAPE_Y > SHAPE_X:
     SHAPE_X, SHAPE_Y = SHAPE_Y, SHAPE_X
-    
+
 print("Shape X Pixels:", SHAPE_X)
 print("Shape Y Pixels:", SHAPE_Y)
+
+
