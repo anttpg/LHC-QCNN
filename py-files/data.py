@@ -52,7 +52,7 @@ def convert_dataset():
     images = []
     labels = []
 
-    path = DATA_PATH
+    path = "test_data"
 
     # Loop through each image in the dataset
     for file in os.listdir(path):
@@ -69,7 +69,7 @@ def convert_dataset():
 
         # Resize the image to (SHAPE_X, SHAPE_Y)
         image = cv2.resize(image, (SHAPE_X, SHAPE_Y))
-        image = image.reshape(1, NUM_QUBITS)  # RESHAPE BACK TO 128x1
+        image = image.reshape(1, NUM_QUBITS)  # RESHAPE BACK TO NUM_QUBITS 
 
         # Normalize the image to be values between 0 and pi
         image = (image / 255.0) * np.pi

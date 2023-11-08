@@ -22,6 +22,11 @@ def callback_graph(weights, obj_func_eval):
     
     # Save weights to a text file
     with open("weights.txt", "w") as file:
+
+        #Write the number of qubits to the start
+        file.write(str(NUM_QUBITS))
+
+        #Write each weight to the file
         for weight in weights:
             file.write(str(weight) + "\n")
 
