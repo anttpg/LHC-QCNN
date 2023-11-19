@@ -19,16 +19,16 @@ function U2 = U2_Circuit_Calculator()
     0 1 0 0
     ];
 
-    theta = pi
-    phi = pi
-    lambda = 0
-    input = [0 ; 0 ; 1/sqrt(2) ; 1/sqrt(2)]
+    theta = pi;
+    phi = pi;
+    lambda = 0;
+    input = [1 ; 0 ; 0 ; 0];
 
-    Q2_Rz = kron(eye(2), Rz(-pi/2))
-    Rz_Ry = kron(Rz(theta), Ry(phi))
+    Q2_Rz = vpa(kron(eye(2), Rz(-pi/2)))
+    Rz_Ry = vpa(kron(Rz(theta), Ry(phi)))
 
-    Q1_Rz = kron(Rz(pi/2), eye(2))
-    Q2_Ry = kron(eye(2), Ry(lambda))
+    Q1_Rz = vpa(kron(Rz(pi/2), eye(2)))
+    Q2_Ry = vpa(kron(eye(2), Ry(lambda)))
 
 
     currentVals = Q2_Rz * input
