@@ -9,7 +9,7 @@ from sklearn.model_selection import train_test_split
 
 def main():
     # Change directory to our folder
-    os.chdir(DATA_PATH)
+    # os.chdir(DATA_PATH)
 
     images, labels = convert_dataset()
     train_images, test_images, train_labels, test_labels = train_test_split(

@@ -1,0 +1,3 @@
+[submodule "LHC-QML"]
+	path = LHC-QML
+	url = git@github.com:panjamos/LHC-QML.git
