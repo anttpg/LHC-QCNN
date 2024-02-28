@@ -1,96 +1,90 @@
-import numpy as np
 import os
+from sklearn.model_selection import train_test_split
+from collections import deque
+from Runtools.database import *
+from runner import *
+from qiskit.quantum_info import SparsePauliOp
+from qiskit.circuit import ParameterVector
 
-import LHC_QML_module as lqm
+
+
 
 class Controller:
+    def __init__(self):
+        self.runner_queue = deque()
+
+    def create_runner(self, data, params, runner_id):
+        params = self.Parameters()
+        data = Train_Test_Data() ## EVENTUALLY, WE WILL REUSE DATA/ PARAMS FROM ELSEWHERE.
+        data.tts_preprocess(None, None, params) # FOr now, recreate for each runner
+        self.runner_queue.append( (Runner(params, data), runner_id) )
+
+    def run_one(self):
+        try:
+            runner, runner_id = self.runner_queue.popleft() 
+            #When results recieved, send to database as well
+            return runner.start() 
+        except Exception as e:
+            print("Exception in runner " + runner_id + "! Failed to complete training. \n")
+            print(e)
+            return None
+
+
+    def run_all(self):
+        results = []
+        while bool(self.runner_queue): # While not empty
+            results.append(self.run_one())
+        
+        return results 
+
+
+
     class Parameters:
-        seed = 123
-        # Features to train on
-        training_feature_keys = [
-            "f_mass4l",
-            # "f_eta4l",
-            "f_Z2mass",
-            "f_Z1mass",
-        ]
+        ## EVENTUALLY MAKE THIS MODULAR 
 
-        num_features = len(training_feature_keys)
+        def __init__(self):
 
-        save_folder = os.path.join("saved", "model1g3-qiskit-estimator-corrected")
+            self.seed = 123
+            # Features to train on
+            self.training_feature_keys = [
+                "f_mass4l",
+                # "f_eta4l",
+                "f_Z2mass",
+                "f_Z1mass",
+            ]
 
-        batch_size = 2
-        n_epochs = 1
+            self.num_features = len(self.training_feature_keys)
 
-        use_pca = False
+            self.save_folder = os.path.join("saved", "model1g3-qiskit-estimator-corrected")
 
-        train_data_size = 80
-        test_data_size = 80
-        valid_data_size = 40
-        total_datasize = train_data_size + test_data_size + valid_data_size
-        half_datasize = total_datasize // 2 # 80 signal and 80 backgrounds
+            self.batch_size = 2
+            self.n_epochs = 1
 
-        is_local_simulator = True
+            self.use_pca = False
 
-        n_qubits = 3
-        num_layers = 5
+            self.train_data_size = 80
+            self.test_data_size = 80
+            self.valid_data_size = 40
+            self.total_datasize = self.train_data_size + self.test_data_size + self.valid_data_size
+            self.half_datasize = self.total_datasize // 2 # 80 signal and 80 backgrounds
 
-        spsa_alpha = 0.5
-        spsa_gamma = 0.101
-        spsa_c     = 0.2
-        spsa_A     = 2.
-        spsa_a1    = 0.2
-        spsa_a     = spsa_a1 * (spsa_A + 1) ** spsa_alpha
+            self.is_local_simulator = True
 
-        signals_folder = "LHC_data\\actual_data\\histos4mu\\histos4mu\\signal"
-        backgrounds_folder = "LHC_data\\actual_data\\histos4mu\\histos4mu\\background"
+            self.n_qubits = 3
+            self.num_layers = 5
+            self.obs = SparsePauliOp("XXI")
+            self.par_inputs = ParameterVector("input", self.n_qubits)
+            self.par_weights = ParameterVector("weights", self.num_layers * self.n_qubits)
 
 
+            self.spsa_alpha = 0.5
+            self.spsa_gamma = 0.101
+            self.spsa_c     = 0.2
+            self.spsa_A     = 2.
+            self.spsa_a1    = 0.2
+            self.spsa_a     = self.spsa_a1 * (self.spsa_A + 1) ** self.spsa_alpha
 
-    def __init__(self, ):
-        pass
+            self.signals_folder = "LHC_data\\actual_data\\histos4mu\\signal"
+            self.backgrounds_folder = "LHC_data\\actual_data\\histos4mu\\background"
 
-    def tts_preprocess(self, signal, background):
-        # load data from files
-        signal_dict, background_dict, files_used = lqm.load_data(
-            signals_folder, backgrounds_folder, training_feature_keys
-        )
-
-        # formats data for input into vqc
-        features, labels = lqm.format_data(signal_dict, background_dict)
-
-        n_signal_events = (labels == 1).sum()
-        n_background_events = (labels == 0).sum()
-
-        features_signal = features[(labels==1)]
-        features_background = features[(labels==0)]
-
-        np.random.shuffle(features_signal)
-        np.random.shuffle(features_background)
-
-        features = np.concatenate((features_signal[:half_datasize], features_background[:half_datasize]))
-        # labels = np.array([1]*half_datasize + [0]*half_datasize, requires_grad=False)
-        labels = np.array([1]*half_datasize + [0]*half_datasize)
-
-        train_features, rest_features, train_labels, rest_labels = train_test_split(
-            features,
-            labels,
-            train_size=train_data_size,
-            test_size=test_data_size + valid_data_size,
-            random_state=seed,
-            stratify=labels
-        )
-
-        # preprocess data (rescaling)
-        train_features, rest_features = lqm.preprocess_data(
-            train_features, rest_features, use_pca, num_features, seed
-        )
-
-
-        valid_features, test_features, valid_labels, test_labels = train_test_split(
-            rest_features,
-            rest_labels,
-            train_size=valid_data_size,
-            test_size = test_data_size,
-            random_state=seed,
-            stratify=rest_labels
-        )
+    

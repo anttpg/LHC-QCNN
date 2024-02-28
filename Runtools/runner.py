@@ -1,5 +1,5 @@
-import os
 from model import run
+from qiskit import QuantumCircuit
 
 class Runner:
     
@@ -17,21 +17,20 @@ class Runner:
         return None # Controller will read ? do what ? interface how ?
 
 
-    def start(self, train_data, test_data):
-        circuit = create_circuit()
-        run(self.params, circuit) # Updates self.results inside the model...'
-        return None
+    def start(self):
+        circuit = self.create_circuit()
+        run(self.params, self.data, circuit) # Updates self.results inside the model...'
+        return None # Return results when nessicary
 
     # Custom function to build the circuit, eventually will be modular 
     def create_circuit(self):
         n_qubits = self.params.n_qubits  
-        num_layers = self.params.num_layers  
+        par_inputs = self.params.par_inputs
+        par_weights = self.params.par_weights
 
         # BUILD CIRCUIT
         qc_template = QuantumCircuit(n_qubits)
 
-        par_inputs = ParameterVector("input", n_qubits)
-        par_weights = ParameterVector("weights", num_layers * n_qubits)
 
         for i in range(n_qubits):
             qc_template.rx(par_inputs[i], i)
@@ -68,6 +67,5 @@ class Runner:
 
 
         # qc_template.measure_all()
-        obs = SparsePauliOp("XXI")
 
         return qc_template

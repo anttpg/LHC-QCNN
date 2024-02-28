@@ -1,14 +1,10 @@
 # IMPORTS
 import numpy as np
-
-import qiskit
-from qiskit import QuantumCircuit
 from qiskit_aer.primitives import Sampler, Estimator
 # from qiskit.primitives import Estimator
-from qiskit.circuit import ParameterVector
-from qiskit.quantum_info import SparsePauliOp
 
-from sklearn.model_selection import train_test_split
+
+
 import time
 from matplotlib import pyplot as plt
 from sklearn.metrics import confusion_matrix
@@ -16,16 +12,22 @@ from sklearn.metrics import ConfusionMatrixDisplay
 
 import os
 
-import LHC_QML_module as lqm
+import Modules.LHC_QML_module as lqm
 
 
 
 
-def run(params, qc_template):
+def run(params, data, qc_template):
     
+    """
+    We import and rename all parameters here to allow for easy changes to
+    this model without having to reference the new parameters.
+
+
+    """
+
     # SETTINGS TO TUNE (IMPORTED FROM ELSEWHERE)
     seed = params.seed
-    training_feature_keys = params.training_feature_keys
     save_folder = params.save_folder
     batch_size = params.batch_size
     n_epochs = params.n_epochs
@@ -34,7 +36,6 @@ def run(params, qc_template):
     test_data_size = params.test_data_size  
     valid_data_size = params.valid_data_size  
     total_datasize = train_data_size + test_data_size + valid_data_size
-    half_datasize = total_datasize // 2  
 
     # Assuming optimizer settings are also to be parameterized
     # opt = NesterovMomentumOptimizer(params.optimizer_learning_rate) 
@@ -48,26 +49,40 @@ def run(params, qc_template):
     spsa_gamma = params.spsa_gamma
     spsa_c = params.spsa_c
     spsa_A = params.spsa_A
-    spsa_a1 = params.spsa_a1
     spsa_a = params.spsa_a
+
+    par_inputs = params.par_inputs
+    par_weights = params.par_weights
+    obs = params.obs
+
+
+    # IMPORT TRAINING/TESTING DATA FROM ELSEWHERE
+    train_features = data.train_features
+    train_labels = data.train_labels
+
+    valid_features = data.valid_features
+    valid_labels =  data.valid_labels
+
+    test_features = data.test_features
+    test_labels = data.test_features
+
+
 
 
     np.random.seed(seed)
 
+    """
     if os.path.exists(save_folder):
         print(f"This notebook may overwrite previous results in the {save_folder} directory")
     else:
         os.makedirs(save_folder)
+    """
 
     # weights_init = 0.5 * np.random.randn(num_layers, n_qubits, requires_grad=True)
     weights_init = 0.5 * np.random.randn(num_layers , n_qubits)
     weights_init = weights_init.flatten()
 
-
-
-
-
-""" 
+    """ 
     # BUILD CIRCUIT
     qc_template = QuantumCircuit(n_qubits)
 
@@ -110,8 +125,7 @@ def run(params, qc_template):
 
     # qc_template.measure_all()
     obs = SparsePauliOp("XXI")
- """
-
+    """
 
 
 
@@ -123,15 +137,13 @@ def run(params, qc_template):
     def accuracy(pred, label):
         return np.mean(np.isclose(pred,label))
 
+    """ 
     def cost(weights, features, labels):
         probs = np.array([model(weights, f) for f in features])
         return loss(probs, labels)
 
 
-
-
-
-    """ 
+    
     # LOAD AND FORMAT DATA
     signals_folder = "LHC_data\\actual_data\\histos4mu\\histos4mu\\signal"
     backgrounds_folder = "LHC_data\\actual_data\\histos4mu\\histos4mu\\background"
@@ -192,8 +204,6 @@ def run(params, qc_template):
         stratify=rest_labels
     )
     """
-
-
 
 
 
@@ -258,7 +268,7 @@ def run(params, qc_template):
 
             weights -= spsa_ak * grad
 
-            np.savez(os.path.join(save_folder, f"weights_{i}_{j}"), weights=weights)
+            ##np.savez(os.path.join(save_folder, f"weights_{i}_{j}"), weights=weights) TEMP DO NOT SAVE
 
             times.append(time.time())
             delta_t = times[-1]-times[-2]
@@ -313,7 +323,8 @@ def run(params, qc_template):
 
 
     # GRAPHS AND CONFUSION MATRIX
-    # Plot the loss
+    # Plot the loss TEMP DISABLED
+    """
     if is_local_simulator:
         lqm.plot_loss(losses_valid)
         plt.savefig(os.path.join(save_folder, "validation_loss.png"))
@@ -328,6 +339,7 @@ def run(params, qc_template):
     lqm.plot_roc(probs_test, test_labels)
     plt.title("Ideal simulation")
     plt.savefig(os.path.join(save_folder, "roc.png"))
+    """
 
     # Confusion matrix
     cm = confusion_matrix(test_labels, preds_test)
