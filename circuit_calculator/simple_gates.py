@@ -1,5 +1,6 @@
 import numpy as np
 
+
 def Rz(b):
     # Rotation about the Z-axis
     return np.array([
