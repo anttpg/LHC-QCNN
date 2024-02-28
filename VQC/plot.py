@@ -5,8 +5,9 @@ from sklearn.decomposition import PCA
 from matplotlib import pyplot as plt
 
 # signals_folder = "./data/signal/4e"
-# signals_folder = "./data/signal/4e"
+signals_folder = "./../LHC_data/actual_data/histos4mu/signal"
 # backgrounds_folder = "./data/background/4e"
+backgrounds_folder = "./../LHC_data/actual_data/histos4mu/background"
 
 load_path = "./models/trained_vqc8"
 #you can either give path to folder containing data files to be used as above or give paths to files individually in array
