@@ -64,7 +64,7 @@ def run(params, data, qc_template):
     valid_labels =  data.valid_labels
 
     test_features = data.test_features
-    test_labels = data.test_features
+    test_labels = data.test_labels
 
 
 
@@ -82,51 +82,6 @@ def run(params, data, qc_template):
     weights_init = 0.5 * np.random.randn(num_layers , n_qubits)
     weights_init = weights_init.flatten()
 
-    """ 
-    # BUILD CIRCUIT
-    qc_template = QuantumCircuit(n_qubits)
-
-    par_inputs = ParameterVector("input", n_qubits)
-    par_weights = ParameterVector("weights", num_layers * n_qubits)
-
-    for i in range(n_qubits):
-        qc_template.rx(par_inputs[i], i)
-
-    for i in range(n_qubits):
-        qc_template.ry(par_weights[i], i)
-
-    for i in range(n_qubits):
-        qc_template.cx(i, (i+1)%n_qubits)
-
-    for i in range(n_qubits):
-        qc_template.rz(par_weights[i+3], i)
-
-    for i in range(n_qubits):
-        qc_template.cx(i, (i+1)%n_qubits)
-
-    for i in range(n_qubits):
-        qc_template.ry(par_weights[i+6], i)
-
-    for i in range(n_qubits):
-        qc_template.cx(i, (i+1)%n_qubits)
-
-    for i in range(n_qubits):
-        qc_template.rz(par_weights[i+9], i)
-
-    for i in range(n_qubits):
-        qc_template.cx(i, (i+1)%n_qubits)
-
-    for i in range(n_qubits):
-        qc_template.rz(par_weights[i+12], i)
-
-    for i in range(n_qubits):
-        qc_template.cx(i, (i+1)%n_qubits)
-
-
-    # qc_template.measure_all()
-    obs = SparsePauliOp("XXI")
-    """
-
 
 
     # DEFINE LOSS
@@ -137,74 +92,12 @@ def run(params, data, qc_template):
     def accuracy(pred, label):
         return np.mean(np.isclose(pred,label))
 
-    """ 
-    def cost(weights, features, labels):
-        probs = np.array([model(weights, f) for f in features])
-        return loss(probs, labels)
+    # def cost(weights, features, labels):
+    #     probs = np.array([model(weights, f) for f in features])
+    #     return loss(probs, labels)
 
 
     
-    # LOAD AND FORMAT DATA
-    signals_folder = "LHC_data\\actual_data\\histos4mu\\histos4mu\\signal"
-    backgrounds_folder = "LHC_data\\actual_data\\histos4mu\\histos4mu\\background"
-
-    # use_pca = False
-
-    # num_features = len(training_feature_keys)
-
-    # load data from files
-    # signal_dict, background_dict, files_used = lqm.load_data(
-    #     signals_folder, backgrounds_folder, training_feature_keys
-    # )
-
-    # # formats data for input into vqc
-    # features, labels = lqm.format_data(signal_dict, background_dict)
-    """
-
-    # n_signal_events = (labels == 1).sum()
-    # n_background_events = (labels == 0).sum()
-
-    # features_signal = features[(labels==1)]
-    # features_background = features[(labels==0)]
-
-    # np.random.shuffle(features_signal)
-    # np.random.shuffle(features_background)
-
-    # features = np.concatenate((features_signal[:half_datasize], features_background[:half_datasize]))
-    # # labels = np.array([1]*half_datasize + [0]*half_datasize, requires_grad=False)
-    # labels = np.array([1]*half_datasize + [0]*half_datasize)
-
-
-
-
-
-    """ 
-    # SPLITS DATA INTO TESTING AND TRAINING SETS
-    train_features, rest_features, train_labels, rest_labels = train_test_split(
-        features,
-        labels,
-        train_size=train_data_size,
-        test_size=test_data_size + valid_data_size,
-        random_state=seed,
-        stratify=labels
-    )
-
-    # preprocess data (rescaling)
-    train_features, rest_features = lqm.preprocess_data(
-        train_features, rest_features, use_pca, num_features, seed
-    )
-
-
-    valid_features, test_features, valid_labels, test_labels = train_test_split(
-        rest_features,
-        rest_labels,
-        train_size=valid_data_size,
-        test_size = test_data_size,
-        random_state=seed,
-        stratify=rest_labels
-    )
-    """
-
 
 
     # TRAINING
@@ -309,13 +202,15 @@ def run(params, data, qc_template):
     probs_test = (np.array(result.values) + 1 ) / 2
     preds_test = np.round(probs_test)
 
+    message = ""
+
     elapsed = time.time() - start
-    print(f"Testing time: {round(elapsed)} seconds\n")
+    message += f"Testing time: {round(elapsed)} seconds\n"
 
     cost_test = loss(probs_test, test_labels)
     acc_test = accuracy(preds_test, test_labels)
 
-    print(f"Test accuracy is {acc_test}")
+    message += f"Test cost: {cost_test:0.3f} | Test accuracy: {acc_test:0.3f} |"
 
 
 
@@ -324,34 +219,33 @@ def run(params, data, qc_template):
 
     # GRAPHS AND CONFUSION MATRIX
     # Plot the loss TEMP DISABLED
-    """
     if is_local_simulator:
         lqm.plot_loss(losses_valid)
-        plt.savefig(os.path.join(save_folder, "validation_loss.png"))
+        plt.savefig("validation_loss.png")
 
     # Plot the class histogram (probability of being classified as signal)
     lqm.plot_class_hist(probs_test, test_labels)
     plt.ylim([0, 16])
     plt.title("Ideal simulation")
-    plt.savefig(os.path.join(save_folder, "classhist.png"))
+    plt.savefig("classhist.png")
 
     # Plot the ROC curve
     lqm.plot_roc(probs_test, test_labels)
     plt.title("Ideal simulation")
-    plt.savefig(os.path.join(save_folder, "roc.png"))
-    """
+    plt.savefig("roc.png")
 
     # Confusion matrix
     cm = confusion_matrix(test_labels, preds_test)
     ConfusionMatrixDisplay(cm).plot()
+    plt.savefig("confusion_matrix.png")
 
-    print("\n\n\n\n\n")
+    message += "\n\n\n\n\n"
 
     # also print a table in the markdown format
-    print("| | predict 0 | predict 1|")
-    print("|---|---|---|")
-    print(f"|true 0|  {cm[0, 0]} | {cm[0, 1]} |")
-    print(f"|true 1|  {cm[1, 0]} | {cm[1, 1]} |")
+    message += "| | predict 0 | predict 1|\n"
+    message += "|---|---|---|\n"
+    message += f"|true 0|  {cm[0, 0]} | {cm[0, 1]} |\n"
+    message += f"|true 1|  {cm[1, 0]} | {cm[1, 1]} |\n"
 
 
 
@@ -359,11 +253,11 @@ def run(params, data, qc_template):
 
 
     # PRINT RESULTS
-    print("\n\n\n\n\n")
+    message += "\n\n\n\n\n"
 
 
-    print("| range | n signal | n background | percentage signal  | percentage background|")
-    print("|---|---|---|---|---|")
+    message += "| range | n signal | n background | percentage signal  | percentage background| \n"
+    message += "|---|---|---|---|---|\n"
 
     cuts = [0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
 
@@ -376,7 +270,12 @@ def run(params, data, qc_template):
         n_signal = np.sum(filtered_labels).astype(int)
         n_background = n_total-n_signal
         
-        per_signal = n_signal/n_total * 100
-        per_background = n_background/n_total * 100
+        if n_total != 0:
+            per_signal = n_signal/n_total * 100
+            per_background = n_background/n_total * 100
 
-        print(f"| >{cut:.1f} | {n_signal} | {n_background} | {per_signal:.1f}%  |  {per_background:.1f}% | ")
+        message += f"| >{cut:.1f} | {n_signal} | {n_background} | {per_signal:.1f}%  |  {per_background:.1f}% | \n"
+
+    print(message)
+    with open("results.txt", "w") as f:
+        f.write(message)

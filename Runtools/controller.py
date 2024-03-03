@@ -1,11 +1,14 @@
 import os
+import platform
 from sklearn.model_selection import train_test_split
 from collections import deque
-from Runtools.database import *
+# from Runtools.database import *
+from database import *
 from runner import *
 from qiskit.quantum_info import SparsePauliOp
 from qiskit.circuit import ParameterVector
 
+from compileoutputs import *
 
 
 
@@ -15,19 +18,19 @@ class Controller:
 
     def create_runner(self, data, params, runner_id):
         params = self.Parameters()
-        data = Train_Test_Data() ## EVENTUALLY, WE WILL REUSE DATA/ PARAMS FROM ELSEWHERE.
-        data.tts_preprocess(None, None, params) # FOr now, recreate for each runner
+        data = Train_Test_Data(params) ## EVENTUALLY, WE WILL REUSE DATA/ PARAMS FROM ELSEWHERE.
+        data.plot_datapoints(runner_id)
+        data.tts_preprocess(None, None) # FOr now, recreate for each runner
         self.runner_queue.append( (Runner(params, data), runner_id) )
 
     def run_one(self):
-        try:
-            runner, runner_id = self.runner_queue.popleft() 
-            #When results recieved, send to database as well
-            return runner.start() 
-        except Exception as e:
-            print("Exception in runner " + runner_id + "! Failed to complete training. \n")
-            print(e)
-            return None
+        runner, runner_id = self.runner_queue.popleft() 
+        #When results recieved, send to database as well
+        rval = runner.start()
+        compile_run_plots(runner_id)            
+        # Once parameters are modular, the self.Parameters call can be changed to fit whatever we do, but for now, need a way to get the params here
+        get_output_text(runner_id, self.Parameters())
+        return rval
 
 
     def run_all(self):
@@ -84,7 +87,11 @@ class Controller:
             self.spsa_a1    = 0.2
             self.spsa_a     = self.spsa_a1 * (self.spsa_A + 1) ** self.spsa_alpha
 
-            self.signals_folder = "LHC_data\\actual_data\\histos4mu\\signal"
-            self.backgrounds_folder = "LHC_data\\actual_data\\histos4mu\\background"
+            if platform.system() == "Windows":
+                self.signals_folder = "LHC_data\\actual_data\\histos4mu\\signal"
+                self.backgrounds_folder = "LHC_data\\actual_data\\histos4mu\\background"
+            elif platform.system() == "Darwin":
+                self.signals_folder = "./../LHC_data/actual_data/histos4mu/signal"
+                self.backgrounds_folder = "./../LHC_data/actual_data/histos4mu/background"
 
     
