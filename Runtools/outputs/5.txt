@@ -1,0 +1,47 @@
+PARAMETERS
+
+training_feature_keys: ['f_lept3_pt', 'f_lept4_pt', 'f_angle_costheta2']
+batch_size: 2
+n_epochs: 1
+use_pca: False
+train_data_size: 80
+test_data_size: 80
+valid_data_size: 40
+total_datasize: 200
+is_local_simulator: True
+n_qubits: 3
+num_layers: 5
+obs: SparsePauliOp(['XXI'],
+              coeffs=[1.+0.j])
+spsa_alpha: 0.5007995742473023
+spsa_gamma: 0.09463395493323455
+spsa_c: 0.20504683688315994
+spsa_A: 2.0140289170723675
+spsa_a: 0.34454546623373844
+
+
+RESULTS
+
+Testing time: 1 seconds
+Test cost: 0.728 | Test accuracy: 0.350 |
+
+
+
+
+| | predict 0 | predict 1|
+|---|---|---|
+|true 0|  22 | 18 |
+|true 1|  34 | 6 |
+
+
+
+
+
+| range | n signal | n background | percentage signal  | percentage background| 
+|---|---|---|---|---|
+| >0.4 | 37 | 40 | 48.1%  |  51.9% | 
+| >0.5 | 6 | 18 | 25.0%  |  75.0% | 
+| >0.6 | 0 | 0 | 25.0%  |  75.0% | 
+| >0.7 | 0 | 0 | 25.0%  |  75.0% | 
+| >0.8 | 0 | 0 | 25.0%  |  75.0% | 
+| >0.9 | 0 | 0 | 25.0%  |  75.0% | 

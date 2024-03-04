@@ -8,28 +8,28 @@ from runner import *
 from qiskit.quantum_info import SparsePauliOp
 from qiskit.circuit import ParameterVector
 
-from compileoutputs import *
-
 
 
 class Controller:
     def __init__(self):
         self.runner_queue = deque()
 
-    def create_runner(self, data, params, runner_id):
-        params = self.Parameters()
-        data = Train_Test_Data(params) ## EVENTUALLY, WE WILL REUSE DATA/ PARAMS FROM ELSEWHERE.
-        data.plot_datapoints(runner_id)
+    def create_runner(self, raw_params, runner_id):
+        # Initialize parameters
+        params = self.Parameters(raw_params)
+        # Create data object with parameters and run_id (run_id necessary for graphs)
+        data = Train_Test_Data(params, runner_id) ## EVENTUALLY, WE WILL REUSE DATA/ PARAMS FROM ELSEWHERE.
+        # Plot datapoints
+        data.plot_datapoints()
         data.tts_preprocess(None, None) # FOr now, recreate for each runner
-        self.runner_queue.append( (Runner(params, data), runner_id) )
+        self.runner_queue.append((Runner(params, data), runner_id))
 
     def run_one(self):
         runner, runner_id = self.runner_queue.popleft() 
         #When results recieved, send to database as well
+        print("\n-------------------------------------------------\n")
+        print(f"Running {runner_id}\n\n")
         rval = runner.start()
-        compile_run_plots(runner_id)            
-        # Once parameters are modular, the self.Parameters call can be changed to fit whatever we do, but for now, need a way to get the params here
-        get_output_text(runner_id, self.Parameters())
         return rval
 
 
@@ -43,49 +43,41 @@ class Controller:
 
 
     class Parameters:
-        ## EVENTUALLY MAKE THIS MODULAR 
-
-        def __init__(self):
-
-            self.seed = 123
+        # Params can just be initialized from the dictionary from the json file
+        def __init__(self, raw_params):
+            self.seed = raw_params["seed"]
             # Features to train on
-            self.training_feature_keys = [
-                "f_mass4l",
-                # "f_eta4l",
-                "f_Z2mass",
-                "f_Z1mass",
-            ]
+            self.training_feature_keys = raw_params["training_feature_keys"]
 
-            self.num_features = len(self.training_feature_keys)
+            self.num_features = raw_params["num_features"]
 
-            self.save_folder = os.path.join("saved", "model1g3-qiskit-estimator-corrected")
+            self.batch_size = raw_params["batch_size"]
+            self.n_epochs = raw_params["n_epochs"]
 
-            self.batch_size = 2
-            self.n_epochs = 1
+            self.use_pca = raw_params["use_pca"]
 
-            self.use_pca = False
-
-            self.train_data_size = 80
-            self.test_data_size = 80
-            self.valid_data_size = 40
+            self.train_data_size = raw_params["train_data_size"]
+            self.test_data_size = raw_params["test_data_size"]
+            self.valid_data_size = raw_params["valid_data_size"]
             self.total_datasize = self.train_data_size + self.test_data_size + self.valid_data_size
             self.half_datasize = self.total_datasize // 2 # 80 signal and 80 backgrounds
 
-            self.is_local_simulator = True
+            self.is_local_simulator = raw_params["is_local_simulator"]
 
-            self.n_qubits = 3
-            self.num_layers = 5
-            self.obs = SparsePauliOp("XXI")
+            self.n_qubits = raw_params["n_qubits"]
+            self.num_layers = raw_params["n_layers"]
+            self.obs = SparsePauliOp(raw_params["obs"])
             self.par_inputs = ParameterVector("input", self.n_qubits)
             self.par_weights = ParameterVector("weights", self.num_layers * self.n_qubits)
 
 
-            self.spsa_alpha = 0.5
-            self.spsa_gamma = 0.101
-            self.spsa_c     = 0.2
-            self.spsa_A     = 2.
-            self.spsa_a1    = 0.2
+            self.spsa_alpha = raw_params["spsa_alpha"]
+            self.spsa_gamma = raw_params["spsa_gamma"]
+            self.spsa_c     = raw_params["spsa_c"]
+            self.spsa_A     = raw_params["spsa_A"]
+            self.spsa_a1    = raw_params["spsa_a1"]
             self.spsa_a     = self.spsa_a1 * (self.spsa_A + 1) ** self.spsa_alpha
+
 
             if platform.system() == "Windows":
                 self.signals_folder = "LHC_data\\actual_data\\histos4mu\\signal"
@@ -93,5 +85,4 @@ class Controller:
             elif platform.system() == "Darwin":
                 self.signals_folder = "./../LHC_data/actual_data/histos4mu/signal"
                 self.backgrounds_folder = "./../LHC_data/actual_data/histos4mu/background"
-
     
