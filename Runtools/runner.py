@@ -18,12 +18,13 @@ class Runner:
         return None # Controller will read ? do what ? interface how ?
 
 
-    def start(self, create_output=True):
+    def start(self, create_output=True, create_plots=False):
         circuit = self.create_circuit()
         run(self.params, self.data, circuit) # Updates self.results inside the model...'
         if create_output:
-            self.data.compile_run_plots()
             self.data.compile_output_text()
+        if create_plots:
+            self.data.compile_run_plots()
         return None # Return results when necessary
 
     # Custom function to build the circuit, eventually will be modular 
