@@ -90,6 +90,7 @@ class Train_Test_Data:
 
             lqm.plot_pairwise_dicts(signal_dict, background_dict)
             plt.savefig(self.id + "dataplot.png")
+            plt.close("all")
 
 
 

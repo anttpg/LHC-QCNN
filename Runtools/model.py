@@ -223,7 +223,7 @@ def run(params, data, qc_template):
             per_signal = n_signal/n_total * 100
             per_background = n_background/n_total * 100
 
-        message += f"| >{cut:.1f} | {n_signal} | {n_background} | {per_signal:.1f}%  |  {per_background:.1f}% | \n"
+            message += f"| >{cut:.1f} | {n_signal} | {n_background} | {per_signal:.1f}%  |  {per_background:.1f}% | \n"
 
     print(message)
     with open("results.txt", "w") as f:

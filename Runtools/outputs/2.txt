@@ -1,6 +1,6 @@
 PARAMETERS
 
-training_feature_keys: ['f_pt4l', 'f_eta4l', 'f_mass4l']
+training_feature_keys: ['f_lept3_pt', 'f_lept4_pt', 'f_Z1mass']
 batch_size: 2
 n_epochs: 1
 use_pca: False
@@ -13,25 +13,25 @@ n_qubits: 3
 num_layers: 5
 obs: SparsePauliOp(['XXI'],
               coeffs=[1.+0.j])
-spsa_alpha: 0.5146840588342908
-spsa_gamma: 0.09868624566875714
-spsa_c: 0.2108453884683108
-spsa_A: 1.9762096385738834
-spsa_a: 0.3340482981848647
+spsa_alpha: 0.5119736455307902
+spsa_gamma: 0.10093684250655338
+spsa_c: 0.21369842286253113
+spsa_A: 1.982871974314042
+spsa_a: 0.3577464739198728
 
 
 RESULTS
 
 Testing time: 1 seconds
-Test cost: 0.649 | Test accuracy: 0.525 |
+Test cost: 0.697 | Test accuracy: 0.425 |
 
 
 
 
 | | predict 0 | predict 1|
 |---|---|---|
-|true 0|  40 | 0 |
-|true 1|  38 | 2 |
+|true 0|  30 | 10 |
+|true 1|  36 | 4 |
 
 
 
@@ -39,9 +39,9 @@ Test cost: 0.649 | Test accuracy: 0.525 |
 
 | range | n signal | n background | percentage signal  | percentage background| 
 |---|---|---|---|---|
-| >0.4 | 17 | 0 | 100.0%  |  0.0% | 
-| >0.5 | 2 | 0 | 100.0%  |  0.0% | 
-| >0.6 | 0 | 0 | 100.0%  |  0.0% | 
-| >0.7 | 0 | 0 | 100.0%  |  0.0% | 
-| >0.8 | 0 | 0 | 100.0%  |  0.0% | 
-| >0.9 | 0 | 0 | 100.0%  |  0.0% | 
+| >0.4 | 40 | 40 | 50.0%  |  50.0% | 
+| >0.5 | 4 | 10 | 28.6%  |  71.4% | 
+| >0.6 | 0 | 0 | 28.6%  |  71.4% | 
+| >0.7 | 0 | 0 | 28.6%  |  71.4% | 
+| >0.8 | 0 | 0 | 28.6%  |  71.4% | 
+| >0.9 | 0 | 0 | 28.6%  |  71.4% | 
