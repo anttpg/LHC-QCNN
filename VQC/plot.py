@@ -34,7 +34,7 @@ else:
     num_features = len(training_feature_keys)
 
 #loads data from files
-signal_dict, background_dict, files_used = lqm.load_data(signals_folder, backgrounds_folder,training_feature_keys)
+signal_dict, background_dict, files_used = lqm.load_data(signals_folder, backgrounds_folder, training_feature_keys)
 
 #formats data for input into vqc
 features, labels = lqm.format_data(signal_dict, background_dict)
@@ -59,8 +59,8 @@ train_features, test_features, train_labels, test_labels = train_test_split(
 train_features, test_features = lqm.preprocess_data(train_features, test_features, use_pca, num_features, seed)
 
 
-#lqm.plot_pairwise_dicts(signal, background)
-#lqm.plot_pairwise(train_features, labels)
+lqm.plot_pairwise_dicts(signal_dict, background_dict)
+lqm.plot_pairwise(train_features, labels)
 
 vqc = VQC.load(load_path)
 lqm.score_model(vqc, train_features, test_features, train_labels, test_labels)

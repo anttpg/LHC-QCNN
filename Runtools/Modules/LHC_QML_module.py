@@ -197,6 +197,8 @@ def plot_pairwise_dicts(signal, background):
     fig = plt.gcf()
     fig.set_size_inches(10, 10)
 
+
+
 def plot_pairwise(features, labels, feature_keys=None):
     if not feature_keys:
         feature_num = range(len(features[0,:]))
@@ -227,6 +229,7 @@ def plot_pairwise(features, labels, feature_keys=None):
     plot.fig.suptitle("Feature Comparison Plots")
     fig = plt.gcf()
     #fig.set_size_inches(10, 10)
+    plt.show()
 
 
 def plot_loss(losses):

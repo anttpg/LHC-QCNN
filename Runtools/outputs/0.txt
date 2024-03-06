@@ -1,0 +1,47 @@
+PARAMETERS
+
+training_feature_keys: ['f_lept3_pt', 'f_lept4_pt', 'f_Z1mass']
+batch_size: 2
+n_epochs: 1
+use_pca: False
+train_data_size: 80
+test_data_size: 80
+valid_data_size: 40
+total_datasize: 200
+is_local_simulator: True
+n_qubits: 3
+num_layers: 5
+obs: SparsePauliOp(['XXI'],
+              coeffs=[1.+0.j])
+spsa_alpha: 0.5
+spsa_gamma: 0.101
+spsa_c: 0.2
+spsa_A: 2
+spsa_a: 0.34641016151377546
+
+
+RESULTS
+
+Testing time: 1 seconds
+Test cost: 0.695 | Test accuracy: 0.525 |
+
+
+
+
+| | predict 0 | predict 1|
+|---|---|---|
+|true 0|  37 | 3 |
+|true 1|  35 | 5 |
+
+
+
+
+
+| range | n signal | n background | percentage signal  | percentage background| 
+|---|---|---|---|---|
+| >0.4 | 40 | 40 | 50.0%  |  50.0% | 
+| >0.5 | 5 | 3 | 62.5%  |  37.5% | 
+| >0.6 | 0 | 0 | 62.5%  |  37.5% | 
+| >0.7 | 0 | 0 | 62.5%  |  37.5% | 
+| >0.8 | 0 | 0 | 62.5%  |  37.5% | 
+| >0.9 | 0 | 0 | 62.5%  |  37.5% | 

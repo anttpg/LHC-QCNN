@@ -1,0 +1,47 @@
+PARAMETERS
+
+training_feature_keys: ['f_pt4l', 'f_eta4l', 'f_mass4l']
+batch_size: 2
+n_epochs: 1
+use_pca: False
+train_data_size: 80
+test_data_size: 80
+valid_data_size: 40
+total_datasize: 200
+is_local_simulator: True
+n_qubits: 3
+num_layers: 5
+obs: SparsePauliOp(['XXI'],
+              coeffs=[1.+0.j])
+spsa_alpha: 0.5051866009663557
+spsa_gamma: 0.09303624904389983
+spsa_c: 0.203991182466888
+spsa_A: 2.0210956829573026
+spsa_a: 0.3704920118675133
+
+
+RESULTS
+
+Testing time: 1 seconds
+Test cost: 0.591 | Test accuracy: 0.912 |
+
+
+
+
+| | predict 0 | predict 1|
+|---|---|---|
+|true 0|  34 | 6 |
+|true 1|  1 | 39 |
+
+
+
+
+
+| range | n signal | n background | percentage signal  | percentage background| 
+|---|---|---|---|---|
+| >0.4 | 40 | 32 | 55.6%  |  44.4% | 
+| >0.5 | 39 | 6 | 86.7%  |  13.3% | 
+| >0.6 | 6 | 0 | 100.0%  |  0.0% | 
+| >0.7 | 0 | 0 | 100.0%  |  0.0% | 
+| >0.8 | 0 | 0 | 100.0%  |  0.0% | 
+| >0.9 | 0 | 0 | 100.0%  |  0.0% | 
