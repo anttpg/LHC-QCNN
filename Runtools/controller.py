@@ -14,13 +14,13 @@ class Controller:
     def __init__(self):
         self.runner_queue = deque()
 
-    def create_runner(self, raw_params, runner_id):
+    def create_runner(self, raw_params, runner_id, plot_datapoints=False):
         # Initialize parameters
         params = self.Parameters(raw_params)
+        hash_id = params.hash_hyperparameters()
         # Create data object with parameters and run_id (run_id necessary for graphs)
-        data = Train_Test_Data(params, runner_id) ## EVENTUALLY, WE WILL REUSE DATA/ PARAMS FROM ELSEWHERE.
+        data = Train_Test_Data(params) ## EVENTUALLY, WE WILL REUSE DATA/ PARAMS FROM ELSEWHERE.
         # Plot datapoints
-        data.plot_datapoints()
         data.tts_preprocess(None, None) # FOr now, recreate for each runner
         self.runner_queue.append((Runner(params, data), runner_id))
 
@@ -70,10 +70,9 @@ class Controller:
             self.par_inputs = ParameterVector("input", self.n_qubits)
             self.par_weights = ParameterVector("weights", self.num_layers * self.n_qubits)
 
-
-            self.spsa_alpha = raw_params["spsa_alpha"]
-            self.spsa_gamma = raw_params["spsa_gamma"]
-            self.spsa_c     = raw_params["spsa_c"]
+            self.spsa_alpha = raw_params["spsa_alpha"] 
+            self.spsa_gamma = raw_params["spsa_gamma"] 
+            self.spsa_c     = raw_params["spsa_c"] 
             self.spsa_A     = raw_params["spsa_A"]
             self.spsa_a1    = raw_params["spsa_a1"]
             self.spsa_a     = self.spsa_a1 * (self.spsa_A + 1) ** self.spsa_alpha
@@ -85,4 +84,8 @@ class Controller:
             elif platform.system() == "Darwin":
                 self.signals_folder = "./../LHC_data/actual_data/histos4mu/signal"
                 self.backgrounds_folder = "./../LHC_data/actual_data/histos4mu/background"
+
+        
+        def hash_hyperparameters(self):
+            return hash((self.spsa_alpha, self.spsa_gamma, self.spsa_c, self.spsa_A, self.spsa_a1))
     

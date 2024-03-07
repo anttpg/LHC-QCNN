@@ -4,6 +4,7 @@ import os
 import itertools
 import time
 from controller import Controller
+
 #from multiprocessing import Pool TODO Implement multiprocessing 
 # TODO Add outputs folder to gitignore
 
@@ -12,11 +13,26 @@ from controller import Controller
 # I think json is probably the best way to do this generally
 def create_param_configs():
     param_dict = {}
+    # USE N FEATURE KEYS GIVEN N QUBITS
     training_feature_keys = ['f_lept3_pt', 'f_lept4_pt', 'f_Z1mass', 'f_angle_costheta2', 'f_pt4l', 'f_eta4l', 'f_jet1_pt', 'f_jet1_e']
     runs_per_permutation = 5
-    permutations = list(itertools.permutations(training_feature_keys, 3))
+    combinations = list(itertools.combinations(training_feature_keys, 3))
 
-    for i in range(len(permutations)):
+    """
+    maxiter (int) – the maximum number of iterations expected to be performed. Used to determine A, if A is not supplied, otherwise ignored.
+
+    alpha (float) – A hyperparameter to calculate ak = a/(A + k + 1)α for each iteration. Its asymptotically optimal value is 1.0.
+
+    gamma (float) – An hyperparameter to calculate ck = c/(k + 1)γ for each iteration. Its asymptotically optimal value is 1/6.
+
+    c (float) – A hyperparameter related to the expected noise. It should be approximately the standard deviation of the expected noise of the cost function.
+
+    A (float) – The stability constant; if not provided, set to be 10% of the maximum number of expected iterations.
+
+    a (float) – A hyperparameter expected to be small in noisy situations, its value could be picked using A, α and ^g0(^θ0). For more details, see Spall (1998b).
+    """
+
+    for i in range(len(combinations)):
         for j in range(runs_per_permutation):
             param_dict[j + (i*runs_per_permutation)] = {
                 "n_qubits": 3,
@@ -34,7 +50,7 @@ def create_param_configs():
                 "spsa_a1": 0.2 + random.uniform(-0.01, 0.015) if j != 0 else 0.2,
                 "use_pca": False,
                 "seed": 123,
-                "training_feature_keys": permutations[i],
+                "training_feature_keys": combinations[i],
                 "num_features": 3,
                 "obs": "XXI"
             }
@@ -43,7 +59,10 @@ def create_param_configs():
         json.dump({run_id: params for run_id, params in param_dict.items()}, f, indent=4)
 
 
+# Only call when you want to optimize the hyperparameters of a network
+def optimize_hyperparams(param_dict ):
 
+    return 0
 
 
 def main():
@@ -66,11 +85,6 @@ def main():
     os.remove("params.json")
 
     print(f"Total time: {time.time() - start}")
-    
-    # test_c.create_runner(None, "1") # Give specific hyperparameters, otherwise use some defaults 2
-    # test_c.create_runner(None, "2")
-    # test_c.create_runner(None, "3")
-    # test_c.run_all()
 
 
 if __name__ == "__main__":
