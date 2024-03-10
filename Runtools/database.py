@@ -43,15 +43,58 @@ class Database:
 
 
 
-    def select_spsas(self, spsa_alpha, spsa_gamma, spsa_c, spsa_A, spsa_a1):
+
+
+    def select_spsas(self, spsa_alpha=None, spsa_gamma=None, spsa_c=None, spsa_A=None, spsa_a1=None):
         """
         This function selects the id of the given spsa parameters from the database. Or None if the parameters do not exist. 
+
+        Args:
+            spsa_alpha (float): The alpha parameter for spsa.
+            spsa_gamma (float): The gamma parameter for spsa.
+            spsa_c (float): The c parameter for spsa.
+            spsa_A (float): The A parameter for spsa.
+            spsa_a1 (float): The a1 parameter for spsa.
+        
+        Returns:
+            list: The id of the spsa parameters if they exist (possibly multiple if <5 parameters were entered), otherwise empty list.
+            Throws an exception if no parameters are given.
         """
-        self.cursor.execute("SELECT id FROM spsas WHERE spsa_alpha = ? AND spsa_gamma = ? AND spsa_c = ? AND spsa_A = ? AND spsa_a1 = ?", 
-                            (spsa_alpha, spsa_gamma, spsa_c, spsa_A, spsa_a1))
-        # Will be none if the parameters do not exist, otherwise will be the id of the parameters inside a list
-        spsa_id = self.cursor.fetchone()
-        return spsa_id if spsa_id is None else spsa_id[0]
+        # Allow parameters to be optional so that we can check different combinations of parameters
+        # If a parameter is not None, add it to the message and the parameters list
+        # IMPORTANT: Cannot have all parameters be None
+        message = "SELECT id FROM spsas WHERE "
+        params = []
+
+        # Add a ? for each parameter that is not None
+        if spsa_alpha is not None:
+            message += "spsa_alpha = ? AND "
+            params.append(spsa_alpha)
+        if spsa_gamma is not None:
+            message += "spsa_gamma = ? AND "
+            params.append(spsa_gamma)
+        if spsa_c is not None:
+            message += "spsa_c = ? AND "
+            params.append(spsa_c)
+        if spsa_A is not None:
+            message += "spsa_A = ? AND "
+            params.append(spsa_A)
+        if spsa_a1 is not None:
+            message += "spsa_a1 = ? AND "
+            params.append(spsa_a1)
+
+        # Remove the last " AND " from the message
+        message = message[:-5]
+
+        # If no parameters were given, raise an exception
+        if len(params) == 0:
+            Exception("No parameters given to select_spsas")
+
+        self.cursor.execute(message, (*params,))
+        # Will be none if the parameters do not exist, otherwise will be tuples of the ids of the parameters inside a list
+        return self.cursor.fetchall()
+
+
 
 
 
@@ -60,6 +103,15 @@ class Database:
     def select_feature_keys(self, n_qubits, feature_keys):
         """
         This function selects the id of the given feature keys from the database. Or None if the keys do not exist. 
+        IMPORTANT: feature_keys must be in the same order as they are in the database (ie same as the order of the list the circuit was run with)
+        Easiest way to keep track of this may be to always ensure the list is sorted alphabetically before being passed to a circuit or this function.
+
+        Args:
+            n_qubits (int): The number of qubits the feature keys are for.
+            feature_keys (list): The feature keys to select the id of.
+
+        Returns:
+            int: The id of the feature keys if they exist, otherwise None.
         """
         message = "SELECT id FROM feature_keys WHERE n_qubits = ? AND "
         # Add a ? for each feature key
@@ -72,8 +124,9 @@ class Database:
         self.cursor.execute(message, (n_qubits, *feature_keys))
 
         # Will be none if the parameters do not exist, otherwise will be the id of the parameters inside a list
-        feature_keys_id = self.cursor.fetchone()
-        return feature_keys_id if feature_keys_id is None else feature_keys_id[0]
+        return self.cursor.fetchall()
+
+
 
 
 
@@ -81,25 +134,81 @@ class Database:
     def select_data_sizes(self, train_data_size, valid_data_size, test_data_size):
         """
         This function selects the id of the given data sizes from the database. Or None if the sizes do not exist. 
+
+        Args:
+            train_data_size (int): The size of the training data.
+            valid_data_size (int): The size of the validation data.
+            test_data_size (int): The size of the test data.
+
+        Returns:
+            int: The id of the data sizes if they exist in the database, otherwise None.
         """
         self.cursor.execute("SELECT id FROM data_sizes WHERE train_data_size = ? AND valid_data_size = ? AND test_data_size = ?", 
                             (train_data_size, valid_data_size, test_data_size))
         # Will be none if the parameters do not exist, otherwise will be the id of the parameters inside a list
-        data_sizes_id = self.cursor.fetchone()
-        return data_sizes_id if data_sizes_id is None else data_sizes_id[0]
+        return self.cursor.fetchall()
 
 
 
 
-    def select_misc_params(self, n_epochs, batch_size, num_layers, obs, is_local_simulator, use_pca, seed):
+
+
+    def select_misc_params(self, n_epochs=None, batch_size=None, num_layers=None, obs=None, is_local_simulator=None, use_pca=None, seed=None):
         """
         This function selects the id of the given misc parameters from the database. Or None if the parameters do not exist. 
+
+        Args:
+            n_epochs (int): The number of epochs.
+            batch_size (int): The batch size.
+            num_layers (int): The number of layers.
+            obs (str): The obs string.
+            is_local_simulator (bool): Whether the simulator is local.
+            use_pca (bool): Whether to use pca.
+            seed (int): The seed.
+
+        Returns:
+            int: The list (possibly multiple if <5 params entered) of ids of the misc parameters if they exist in the database, otherwise empty list.
+            Throws an exception if no parameters are given.
         """
-        self.cursor.execute("SELECT id FROM misc_params WHERE n_epochs = ? AND batch_size = ? AND num_layers = ? AND obs = ? AND is_local_simulator = ? AND use_pca = ? AND seed = ?", 
-                            (n_epochs, batch_size, num_layers, obs, is_local_simulator, use_pca, seed))
-        # Will be none if the parameters do not exist, otherwise will be the id of the parameters inside a list
-        misc_params_id = self.cursor.fetchone()
-        return misc_params_id if misc_params_id is None else misc_params_id[0]
+        message = "SELECT id FROM misc_params WHERE "
+        params = []
+
+        # Add a ? for each parameter that is not None
+        if n_epochs is not None:
+            message += "n_epochs = ? AND "
+            params.append(n_epochs)
+        if batch_size is not None:
+            message += "batch_size = ? AND "
+            params.append(batch_size)
+        if num_layers is not None:
+            message += "num_layers = ? AND "
+            params.append(num_layers)
+        if obs is not None:
+            message += "obs = ? AND "
+            params.append(obs)
+        if is_local_simulator is not None:
+            message += "is_local_simulator = ? AND "
+            params.append(is_local_simulator)
+        if use_pca is not None:
+            message += "use_pca = ? AND "
+            params.append(use_pca)
+        if seed is not None:
+            message += "seed = ? AND "
+            params.append(seed)
+
+        # Remove the last " AND " from the message
+        message = message[:-5]
+
+        # If no parameters were given, raise an exception
+        if len(params) == 0:
+            Exception("No parameters given to select_misc_params")
+
+        self.cursor.execute(message, (*params,))
+
+        # Will be none if the parameters do not exist, otherwise will be a list of tuples of the ids of the parameters
+        return self.cursor.fetchall()
+
+
 
 
 
@@ -108,22 +217,31 @@ class Database:
     def create_circuit_entry(self, params):
         """
         Create a new entry in the circuits table with the given parameters. Return the id of the new entry as the unique id for the current circuit.
+
+        Args:
+            params (Parameters): The parameters for the circuit.
+
+        Returns:
+            int: The id of the new entry in the circuits table.
         """
 
         # Check if the spsa params already exist in the table
         spsas_id = self.select_spsas(params.spsa_alpha, params.spsa_gamma, params.spsa_c, params.spsa_A, params.spsa_a1)
         # If the spsa params do not exist in the table, add them and get the new id
-        if spsas_id is None:
+        if not spsas_id:
             self.cursor.execute("INSERT INTO spsas (spsa_alpha, spsa_gamma, spsa_c, spsa_A, spsa_a1) VALUES (?, ?, ?, ?, ?)", 
                                 (params.spsa_alpha, params.spsa_gamma, params.spsa_c, params.spsa_A, params.spsa_a1))
             # Get new id (can only use this for tables with autoincrementing ids)
             spsas_id = self.cursor.lastrowid
+        else:
+            # If they do exist, they will have 1 id, so get that id
+            spsas_id = spsas_id[0][0]
 
 
         # Check if the feature keys already exist in the table
         feature_keys_id = self.select_feature_keys(params.n_qubits, params.training_feature_keys)
         # If the feature keys do not exist in the table, add them and get the new id
-        if feature_keys_id is None:
+        if not feature_keys_id:
             message = "INSERT INTO feature_keys (n_qubits, "
 
             # Add a ? for each feature key
@@ -143,24 +261,33 @@ class Database:
             self.cursor.execute(message, (params.n_qubits, *params.training_feature_keys))
             # Get new id
             feature_keys_id = self.cursor.lastrowid
+        else:
+            # If they do exist, they will have 1 id, so get that id
+            feature_keys_id = feature_keys_id[0][0]
         
 
         # Check if the data sizes already exist in the table
         data_sizes_id = self.select_data_sizes(params.train_data_size, params.valid_data_size, params.test_data_size)
         # If the data sizes do not exist in the table, add them and get the new id
-        if data_sizes_id is None:
+        if not data_sizes_id:
             self.cursor.execute("INSERT INTO data_sizes (train_data_size, valid_data_size, test_data_size) VALUES (?, ?, ?)", 
                                 (params.train_data_size, params.valid_data_size, params.test_data_size))
             data_sizes_id = self.cursor.lastrowid
+        else:
+            # If they do exist, they will have 1 id, so get that id
+            data_sizes_id = data_sizes_id[0][0]
 
 
         # Check if the misc params already exist in the table
         misc_params_id = self.select_misc_params(params.n_epochs, params.batch_size, params.num_layers, params.obs_text, params.is_local_simulator, params.use_pca, params.seed)
         # If the misc params do not exist in the table, add them and get the new id
-        if misc_params_id is None:
+        if not misc_params_id:
             self.cursor.execute("INSERT INTO misc_params (n_epochs, batch_size, num_layers, obs, is_local_simulator, use_pca, seed) VALUES (?, ?, ?, ?, ?, ?, ?)", 
                                 (params.n_epochs, params.batch_size, params.num_layers, params.obs_text, params.is_local_simulator, params.use_pca, params.seed))
             misc_params_id = self.cursor.lastrowid
+        else:
+            # If they do exist, they will have 1 id, so get that id
+            misc_params_id = misc_params_id[0][0]
 
 
         # Add the new circuit entry to the outputs table
@@ -181,6 +308,16 @@ class Database:
     # Callback function to be called by controller every time it completes a runner (ie like run_one completes), signal to the database that new 
     # Data has appeared, allowing us to update the graphs, AND  SOMEHOW SAVE DATA
     def update_callback(self, circuit_id, new_data):
+        """
+        This function updates the database with the new data for the circuit with the given circuit_id.
+
+        Args:
+            circuit_id (int): The id of the circuit to update the data for.
+            new_data (Results): The new data for the circuit.
+
+        Returns:
+            None 
+        """
         # Add the new valid loss to the database with each entry corresponding to the new id (all entries with this id represent the losses for this run)
         for entry in new_data.valid_loss:
             self.cursor.execute("INSERT INTO valid_loss (circuit_id, valid_loss) VALUES (?, ?)", (circuit_id, entry))
@@ -201,13 +338,229 @@ class Database:
 
 
 
+    
+    # If you want any data for a circuit with a certain id, call this function. It will pass all data for that circuit to the caller,
+    # and the caller can then do whatever they want with it. If you want data that corresponds to certain conditions, use the other
+    # get_data function. If you want data corresponding to an id and certain conditions, use this function and then filter the resulting data however you want.
+    def get_data_circuit_id(self, circuit_id):
+        """
+        Retrieves all data from database for a circuit with the given circuit_id.
+
+        Args:
+            circuit_id (int): The id of the circuit to retrieve data for.
+
+        Returns:
+            Dictionary: The data for the circuit with the given id. If there is no data for the circuit, returns None.
+            Dictionary will be in the following format:
+            {
+                "circuit_id": int,
+                "spsas": {
+                    "spsa_alpha": float,
+                    "spsa_gamma": float,
+                    "spsa_c": float,
+                    "spsa_A": float,
+                    "spsa_a1": float
+                },
+                "feature_keys": list of feature keys,
+                "data_sizes": [train_data_size, valid_data_size, test_data_size],
+                "misc_params": {
+                    "n_epochs": int,
+                    "batch_size": int,
+                    "num_layers": int,
+                    "obs": str,
+                    "is_local_simulator": bool,
+                    "use_pca": bool,
+                    "seed": int
+                },
+                "test_probs": list,
+                "test_preds": list,
+                "test_labels": list,
+                "valid_loss": list,
+                "cost": float,
+                "test_accuracy": float,
+                "run_time": float
+            }
+        """
+
+        self.cursor.execute("SELECT * FROM outputs JOIN spsas ON outputs.spsas_id = spsas.id JOIN feature_keys ON outputs.feature_keys_id = feature_keys.id \
+                                      JOIN data_sizes ON outputs.data_sizes_id = data_sizes.id JOIN misc_params ON outputs.misc_params_id = misc_params.id WHERE outputs.id = ?", (circuit_id,))
+
+        data = self.cursor.fetchone()
+
+        if data:
+            test_labels = []
+            test_probs = []
+            test_preds = []
+            # Get the test data for the circuit
+            self.cursor.execute("SELECT test_label, test_prob, test_pred FROM test_data WHERE circuit_id = ?", (circuit_id,))
+            for entry in self.cursor.fetchall():
+                test_labels.append(entry[0])
+                test_probs.append(entry[1])
+                test_preds.append(entry[2])
+
+            # Get the valid loss for the circuit
+            self.cursor.execute("SELECT valid_loss FROM valid_loss WHERE circuit_id = ?", (circuit_id,))
+            valid_loss = [entry[0] for entry in self.cursor.fetchall()]
+
+            # Return the data for the circuit
+            # IMPORTANT: Indices are based on the current structure of the database. If that changes, this will need to be updated
+            data = {
+                "circuit_id": circuit_id,
+                "spsas": {
+                    "spsa_alpha": data[12],
+                    "spsa_gamma": data[13],
+                    "spsa_c": data[14],
+                    "spsa_A": data[15],
+                    "spsa_a1": data[16]
+                },
+                "feature_keys": [data[i] for i in range(19, 19 + data[18])],
+                "data_sizes": [data[45], data[46], data[47]],
+                "misc_params": {
+                    "n_epochs": data[49],
+                    "batch_size": data[50],
+                    "num_layers": data[51],
+                    "obs": data[52],
+                    "is_local_simulator": data[53],
+                    "use_pca": data[54],
+                    "seed": data[55]
+                },
+                "test_probs": test_probs,
+                "test_preds": test_preds,
+                "test_labels": test_labels,
+                "valid_loss": valid_loss,
+                "cost": data[7],
+                "test_accuracy": data[8],
+                "run_time": data[9]
+            }
+
+        return data
+        
+
+
+
+
+
+
+
+    def id_message(self, message, ids, params):
+        """
+        Adds new id query and corresponding question marks to query if ids are not None.
+        Updates the parameters list with the ids if they are not None. 
+
+        Args:
+            message (str): The message to add the ids to.
+            ids (list): The ids to add to the message.
+            params (list): The list of parameters to update with the ids.
+
+        Returns:
+            str: The updated message.
+            list: The updated list of parameters.
+        """
+        final_message = ""
+
+        if ids:
+            for idee in ids:
+                message += "?, "
+                params.append(idee[0])
+            message = message[:-2] + ") AND "
+
+            final_message = message
+
+        return final_message, params
+
+
+
+
+
+
+
+
     # Given a circuit_id a name of a key in the database, and CONDITIONS that the data must pass, return an array of that data. 
     # (MIGHT HAVE TO CHANGE, SINCE THERE MIGHT BE TOO MUCH VARIABILITY IN THIS?)
 
     # Ideally, we would have some way to pass over conditons that must be met for the data to be included in the results passed back, EX
     # Conditions = order most recent results, first 100 results, results must not == 0 
-    def get_data(self, circuit_id, conditions, key_name):
-        return None
+    def get_conditional_data(self, spsas=None, feature_keys=None, data_sizes=None, misc_params=None, test_accuracy_gt=None, test_accuracy_lt=None, time=None):
+        """
+        This function retrieves data from the database based on the given conditions. Returns a list of data for the circuits that meet the conditions.
+        Usage: If you want to filter by a parameter, pass the parameter. If you don't want to filter by a parameter, pass None for that parameter.
+        For simplicity, use parameter=parameter_value in the call for all parameters you want to filter by.
+
+        Args:
+            NOTE: If dicts are given for spsas or misc_params, all parameters must be given. To not filter by a parameter, pass None for that parameter.
+            Ex: spsas = {"spsa_alpha": None, "spsa_gamma": 0.166, "spsa_c": None, "spsa_A": None, "spsa_a1": 0.1} would query for all entries with spsa_gamma = 0.166 and spsa_a1 = 0.1
+
+            spsas (dict): The spsa parameters to filter the data by. Ex: {"spsa_alpha": 0.1, "spsa_gamma": 0.166, "spsa_c": 0.1, "spsa_A": 3, "spsa_a1": 0.1}
+            feature_keys (list): The feature keys to filter the data by. Ex: ["feature1", "feature2", "feature3"]
+            data_sizes (list): The data sizes to filter the data by. Ex: [100, 100, 100]
+            misc_params (dict): The miscellaneous parameters to filter the data by. Ex: {"n_epochs": 100, "batch_size": 100, "num_layers": 3, "obs": "X", "is_local_simulator": 1, "use_pca": 0, "seed": 100}
+            test_accuracy_gt (float): The minimum test accuracy to filter the data by. 
+            test_accuracy_lt (float): The maximum test accuracy to filter the data by.
+            time (float): The minimum time to filter the data by. TODO
+
+        Returns:
+            list: The data for the circuits that meet the conditions. If no circuits meet the conditions, returns an empty list.
+            List will be in the same format as the data returned by get_data_circuit_id().
+        """
+        message = "SELECT id FROM outputs WHERE "
+        params = []
+
+        # For each parameter, add the ids of the entries that meet the conditions to the message (if the parameter was given)
+        if spsas:
+            spsa_ids = self.select_spsas(spsa_alpha=spsas["spsa_alpha"], spsa_gamma=spsas["spsa_gamma"], spsa_c=spsas["spsa_c"], spsa_A=spsas["spsa_A"], spsa_a1=spsas["spsa_a1"])
+            new_message, params = self.id_message("spsas_id IN (", spsa_ids, params)
+            message += new_message
+
+        if feature_keys:
+            feature_keys_ids = self.select_feature_keys(len(feature_keys), feature_keys)
+            new_message, params = self.id_message("feature_keys_id IN (", feature_keys_ids, params)
+            message += new_message
+
+        if data_sizes:
+            data_sizes_ids = self.select_data_sizes(data_sizes[0], data_sizes[1], data_sizes[2])
+            new_message, params = self.id_message("data_sizes_id IN (", data_sizes_ids, params)
+            message += new_message
+
+        if misc_params:
+            misc_params_ids = self.select_misc_params(misc_params["n_epochs"], misc_params["batch_size"], misc_params["num_layers"], misc_params["obs"], 
+                                                      misc_params["is_local_simulator"], misc_params["use_pca"], misc_params["seed"])
+            new_message, params = self.id_message("misc_params_id IN (", misc_params_ids, params)
+            message += new_message
+
+        if test_accuracy_gt:
+            test_accuracy_ids = self.cursor.execute("SELECT id FROM outputs WHERE test_accuracy > ?", (test_accuracy_gt,)).fetchall()
+            new_message, params = self.id_message("id IN (", test_accuracy_ids, params)
+            message += new_message
+
+        if test_accuracy_lt:
+            test_accuracy_ids = self.cursor.execute("SELECT id FROM outputs WHERE test_accuracy < ?", (test_accuracy_lt,)).fetchall()
+            new_message, params = self.id_message("id IN (", test_accuracy_ids, params)
+            message += new_message
+
+        # Don't have time for this now, can implement but will do later
+        # All entries where time is greater than the given time
+        # if time:
+            # time_ids = self.cursor.execute("SELECT id FROM outputs WHERE time > ?", (time,)).fetchall()
+            # new_message, params = self.id_message("id IN (", time_ids, params)
+            # message += new_message
+        
+        message = message[:-5]
+
+        ids = []
+        # If no parameters were given, don't run
+        # Else run the message and get the ids of the entries that meet the conditions
+        if len(message) > 28:
+            self.cursor.execute(message, (*params,))
+            ids = self.cursor.fetchall()
+
+        datas = []
+        # Get all data for each circuit that meets the conditions
+        for idee in ids:
+            data = self.get_data_circuit_id(idee[0])
+            if data:
+                datas.append(data)
+
+        return datas
     
 
     # Creates and returns a single plot, NOT image. (IE some MPL object we can change and update later...)

@@ -85,6 +85,13 @@ def main():
 
     c.run_all()
 
+    print("Empty params:", database.get_conditional_data())
+    print("Reg spsas: ", database.get_conditional_data(spsas={"spsa_alpha": 0.5, "spsa_gamma": 0.101, "spsa_c": 0.2, "spsa_A": 2, "spsa_a1": 0.2}))
+    print("Bad spsas: ", database.get_conditional_data(spsas={"spsa_alpha": 0.9, "spsa_gamma": 0.7, "spsa_c": 0.3, "spsa_A": 2, "spsa_a1": 0.2}))
+    print("Partial spsas: ", database.get_conditional_data(spsas={"spsa_alpha": None, "spsa_gamma": 0.101, "spsa_c": None, "spsa_A": 2, "spsa_a1": None}))
+    print("Partial spsas and all else: ", database.get_conditional_data(spsas={"spsa_alpha": None, "spsa_gamma": 0.101, "spsa_c": None, "spsa_A": 2, "spsa_a1": None}, 
+                                        feature_keys=['f_lept3_pt', 'f_lept4_pt', 'f_Z1mass'], test_accuracy_gt=0.5, test_accuracy_lt=0.95, 
+                                        data_sizes=(80, 40, 80), misc_params={"is_local_simulator": True, "use_pca": False, "seed": 123, "batch_size": None, "n_epochs": None,  "num_layers": None, "obs": "XXI"}))
     # This is important, otherwise the database will not be saved
     database.close()
 
