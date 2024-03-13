@@ -3,13 +3,6 @@ from qiskit import QuantumCircuit
 
 
 class Runner:
-    
-    class Results:
-        def __init__(self):
-            self.info1 = 1
-            self.info2 = 'time'
-            print('initialised')
-
     def __init__(self, params, data):
         self.results = None
         self.params = params
@@ -18,14 +11,45 @@ class Runner:
         return None # Controller will read ? do what ? interface how ?
 
 
-    def start(self, create_output=True, create_plots=False):
+
+
+    class Results:
+        # This class will be used to store the results of the run
+        # set_run_data will be called by the run function to update the results
+        def __init__(self):
+            self.test_labels = None
+            self.test_prob = None
+            self.test_pred = None
+
+            self.valid_loss = None
+
+            self.cost = None
+            self.test_accuracy = None
+
+            self.run_time = None
+
+        def set_run_data(self, labels, prob, pred, valid_loss, cost, test_accuracy, run_time):
+            self.test_labels = labels
+            self.test_prob = prob
+            self.test_pred = pred
+            self.valid_loss = valid_loss
+            self.cost = cost
+            self.test_accuracy = test_accuracy
+            self.run_time = run_time
+
+
+
+
+
+    def start(self):
         circuit = self.create_circuit()
-        run(self.params, self.data, circuit) # Updates self.results inside the model...'
-        if create_output:
-            self.data.compile_output_text()
-        if create_plots:
-            self.data.compile_run_plots()
-        return None # Return results when necessary
+        # Returns the Results object that was passed to it
+        # The object will be updated with the results of the run
+        return run(self.params, self.data, circuit, self.Results())
+
+
+
+
 
     # Custom function to build the circuit, eventually will be modular 
     def create_circuit(self):

@@ -11,26 +11,44 @@ from qiskit.circuit import ParameterVector
 
 
 class Controller:
-    def __init__(self):
+    def __init__(self, database):
         self.runner_queue = deque()
+        self.database = database
 
-    def create_runner(self, raw_params, runner_id, plot_datapoints=False):
+
+
+
+    def create_runner(self, raw_params):
         # Initialize parameters
         params = self.Parameters(raw_params)
-        hash_id = params.hash_hyperparameters()
         # Create data object with parameters and run_id (run_id necessary for graphs)
         data = Train_Test_Data(params) ## EVENTUALLY, WE WILL REUSE DATA/ PARAMS FROM ELSEWHERE.
         # Plot datapoints
-        data.tts_preprocess(None, None) # FOr now, recreate for each runner
-        self.runner_queue.append((Runner(params, data), runner_id))
+        data.tts_preprocess(None, None) # For now, recreate for each runner
+
+        circuit_id = self.database.create_circuit_entry(params)
+
+        self.runner_queue.append((Runner(params, data), circuit_id))
+
+        # Return the circuit_id for this specific run
+        # Easiest to do this here instead of passing it in since the database will keep track of the unique ids
+        # So initialize new row in database for output, then return the id
+        return circuit_id
+
+
+
 
     def run_one(self):
-        runner, runner_id = self.runner_queue.popleft() 
+        runner, circuit_id = self.runner_queue.popleft() 
         #When results recieved, send to database as well
         print("\n-------------------------------------------------\n")
-        print(f"Running {runner_id}\n\n")
+        print(f"Running {circuit_id}\n\n")
         rval = runner.start()
+        self.database.update_callback(circuit_id, rval)
         return rval
+
+
+
 
 
     def run_all(self):
@@ -39,6 +57,8 @@ class Controller:
             results.append(self.run_one())
         
         return results 
+
+
 
 
 
@@ -66,6 +86,8 @@ class Controller:
 
             self.n_qubits = raw_params["n_qubits"]
             self.num_layers = raw_params["n_layers"]
+            # For database
+            self.obs_text = raw_params["obs"]
             self.obs = SparsePauliOp(raw_params["obs"])
             self.par_inputs = ParameterVector("input", self.n_qubits)
             self.par_weights = ParameterVector("weights", self.num_layers * self.n_qubits)
@@ -84,8 +106,3 @@ class Controller:
             elif platform.system() == "Darwin":
                 self.signals_folder = "./../LHC_data/actual_data/histos4mu/signal"
                 self.backgrounds_folder = "./../LHC_data/actual_data/histos4mu/background"
-
-        
-        def hash_hyperparameters(self):
-            return hash((self.spsa_alpha, self.spsa_gamma, self.spsa_c, self.spsa_A, self.spsa_a1))
-    

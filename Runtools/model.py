@@ -15,7 +15,7 @@ import Modules.LHC_QML_module as lqm
 
 
 
-def run(params, data, qc_template):
+def run(params, data, qc_template, results):
     
     np.random.seed(params.seed)
 
@@ -162,7 +162,9 @@ def run(params, data, qc_template):
     message += f"Test cost: {cost_test:0.3f} | Test accuracy: {acc_test:0.3f} |"
 
 
-
+    # Save the results to the results object and return it
+    results.set_run_data(data.test_labels, probs_test, preds_test, losses_valid, cost_test, acc_test, elapsed)
+    return results
 
 
 
