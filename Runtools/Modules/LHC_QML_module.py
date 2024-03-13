@@ -272,7 +272,8 @@ def plot_roc(prediction, labels):
 def print_get_root_filepaths(directory_path):
     directory = os.fsencode(directory_path)
     filepaths = []
-
+    print(directory)
+    
     for file in os.listdir(directory):
         filename = os.fsdecode(file)
         if filename.endswith('.root'):

@@ -6,13 +6,22 @@ from PIL import Image
 from matplotlib import pyplot as plt
 import sqlite3
 from functools import partial
-
+import traceback
 
 class Database:
 
-    def __init__(self, filepath):
-        # self.circuit_list = #FIGURE OUT?
-        self.conn = sqlite3.connect(filepath)
+    def __init__(self, filepath, interface_queue):
+        self.interface_queue = interface_queue
+    
+        try:
+            self.conn = sqlite3.connect(filepath)
+        except Exception as e:
+            traceback.print_exc()
+            print("\n\n")
+            print(os.listdir(filepath))
+            print("Error loading database from \'" + filepath + "\', likely db is not generated. DATABASE.DB IS IN GITIGNORE, MUST RUN 'init-database.py' TO CREATE LOCALLY")
+            exit(0)
+
         self.cursor = self.conn.cursor()
 
 
@@ -562,30 +571,63 @@ class Database:
 
         return datas
     
+    
+    # I dont understand your code XD so this is placeholder...
+    def update_data(self, key):
+        # Example of adding a data update to the queue from the database side
+        update_data = {'x': x_values, 'y': y_values, 'plot_id': 'some_identifier'}
+        self.update_queue.put(update_data)
 
+
+    """
     # Creates and returns a single plot, NOT image. (IE some MPL object we can change and update later...)
     # Based on some variables for the X/Y (I WILL PASS A STRING WITH WHAT I WANT TO PLOT, YOU CALL GET DATA)
     # X_DATA, Y_DATA are TUPLES, with the data (condition, key_name)
 
-    # Save this plot as another entry under the circuit_id dictionary, as a tuple of the (plot reference, and partial function)
+    # Save this plot as another entry under the circuit_id dictionary, as a tuple of the (plot reference, and partial function)  
     def plot(self, circuit_id, x_data, y_data):
-
+        # Retrieve data using the provided keys (ignoring conditions for simplicity)
+        x_values, y_values = self.get_data(x_data[1]), self.get_data(y_data[1])
+        
+        # Create the plot
+        fig, ax = plt.subplots()
+        ax.plot(x_values, y_values)
+        ax.set(xlabel=x_data[1], ylabel=y_data[1], title=f'Plot for {circuit_id}')
+        
+        # Store the plot and its update function in the dictionary
+        self.plots_dict[circuit_id] = (fig, ax, partial(self.update_XY, circuit_id))
+        
         # partial(get_data, 'yes')
-        return None
-    
+        update_queue.put(new_figure)
+        return fig, ax
+
     # Given a list of circuit IDs and a variables for the X/Y list of (CONDITION, STRING) type, generate a plot for each circuit, return list of PLOTS
     def create_plots(self, ids, xs, ys):
-        return None
-    
+        plots = []
+        for id, x, y in zip(ids, xs, ys):
+            plot = self.plot(id, x, y)
+            plots.append(plot)
+        return plots
+
     # Given a plot, UPDATE the X/Y values based on new data
-    def update_XY(self, plot, x_data, y_data):
-        return None
+    def update_XY(self, circuit_id, x_data, y_data):
+        # Assuming circuit_id exists in plots_dict and has been previously created by plot method
+        if circuit_id in self.plots_dict:
+            fig, ax, _ = self.plots_dict[circuit_id]
+            
+            # Clear the current axes and plot new data
+            ax.clear()
+            x_values, y_values = self.get_data(x_data[1]), self.get_data(y_data[1])
+            ax.plot(x_values, y_values)
+            ax.set(xlabel=x_data[1], ylabel=y_data[1], title=f'Updated Plot for {circuit_id}')
+            fig.canvas.draw()
+        else:
+            print(f"No plot found for circuit ID {circuit_id}")
+    """
     
     # Given a list of circuit IDs, update each plots data corresponding to that circuit ID
     def update_plots(self, ids):
         pass
-
-
 
     # Given a plot, generate a single image with some helpful result name, and return its filepath
     def generate_image(self):

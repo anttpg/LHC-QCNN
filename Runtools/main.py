@@ -3,10 +3,14 @@ import random
 import os
 import itertools
 import time
+
+from queue import Queue
+import threading
 from controller import Controller
 from database import Database
+from interface import Interface 
 
-DATABASE_PATH = "./database/database.db"
+DATABASE_PATH = "./Runtools/database/database.db"
 
 #from multiprocessing import Pool TODO Implement multiprocessing 
 
@@ -69,10 +73,27 @@ def optimize_hyperparams(param_dict ):
     return 0
 
 
+
+
 def main():
     create_param_configs()
-    database = Database(DATABASE_PATH)
+
+    update_queue = Queue()
+    database = Database(DATABASE_PATH, update_queue)
     c = Controller(database)
+
+    # Runs interface, made so we can multithread
+    def run_interface():
+        root = tk.Tk()
+        app = Interface(root, database, update_queue)
+        root.mainloop()
+
+    interface_thread = threading.Thread(target=run_interface)
+    interface_thread.daemon = True  # make interface thread a daemon
+    interface_thread.start()
+    
+    
+  
 
     start = time.time()
 

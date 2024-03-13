@@ -1,5 +1,7 @@
 import sqlite3
+import os
 
+os.chdir("./Runtools/database")
 conn = sqlite3.connect('database.db')
 
 c = conn.cursor()
