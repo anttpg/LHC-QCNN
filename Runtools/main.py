@@ -4,6 +4,7 @@ import os
 import itertools
 import time
 
+import tkinter as tk
 from queue import Queue
 import threading
 import tkinter as tk
@@ -78,14 +79,15 @@ def optimize_hyperparams(param_dict):
 def main():
     create_param_configs()
 
+    request_queue = Queue()
     update_queue = Queue()
-    database = Database(DATABASE_PATH, update_queue)
+    database = Database(DATABASE_PATH, request_queue, update_queue)
     c = Controller(database)
 
     # Runs interface, made so we can multithread
     def run_interface():
         root = tk.Tk()
-        app = Interface(root, database, update_queue)
+        app = Interface(root, database, request_queue, update_queue)
         root.mainloop()
 
     interface_thread = threading.Thread(target=run_interface)

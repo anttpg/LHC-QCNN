@@ -10,8 +10,9 @@ import traceback
 
 class Database:
 
-    def __init__(self, filepath, interface_queue):
-        self.interface_queue = interface_queue
+    def __init__(self, filepath, request_queue, output_queue):
+        self.request_queue = request_queue
+        self.output_queue = output_queue
     
         try:
             self.conn = sqlite3.connect(filepath)
