@@ -7,6 +7,8 @@ from matplotlib import pyplot as plt
 import sqlite3
 from functools import partial
 import traceback
+import queue
+import time
 
 class Database:
 
@@ -24,6 +26,9 @@ class Database:
             exit(0)
 
         self.cursor = self.conn.cursor()
+        print("! Call process requests !")
+        self.process_requests()
+
 
 
 
@@ -480,8 +485,26 @@ class Database:
 
 
 
+    def process_requests(self):
+        # Check for new updates in the queue and process them
+        try:
+            while True:
+                # Try to get an update from the queue, but don't block
+                print("Checking for requests")
+                (request_x, request_y) = self.request_queue.get(block=False)
+                print("Request recieved, gathering data")
 
+                x_data = self.get_data_circuit_id(1)[request_x]
+                y_data = range(1, len(x_data))
+                # Put the data in the queue 
+                self.output_queue.put((request_x, request_y, x_data, y_data))
+                print("Added data to queue")
+                self.request_queue.task_done()
+        except queue.Empty:
+            pass
 
+        time.sleep(1)
+        self.process_requests()
 
 
 
@@ -573,6 +596,7 @@ class Database:
         return datas
     
     
+    """
     # I dont understand your code XD so this is placeholder...
     def update_data(self, key):
         # Example of adding a data update to the queue from the database side
@@ -580,7 +604,7 @@ class Database:
         self.update_queue.put(update_data)
 
 
-    """
+    
     # Creates and returns a single plot, NOT image. (IE some MPL object we can change and update later...)
     # Based on some variables for the X/Y (I WILL PASS A STRING WITH WHAT I WANT TO PLOT, YOU CALL GET DATA)
     # X_DATA, Y_DATA are TUPLES, with the data (condition, key_name)

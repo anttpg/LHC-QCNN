@@ -81,47 +81,58 @@ def main():
 
     request_queue = Queue()
     update_queue = Queue()
-    database = Database(DATABASE_PATH, request_queue, update_queue)
-    c = Controller(database)
+
+
+    def run_database():
+        database = Database(DATABASE_PATH, request_queue, update_queue)
+        c = Controller(database)
+
+        start = time.time()
+
+        with open("params.json", "r") as f:
+            param_dict = json.load(f)
+
+            # Create a runner for each set of parameters in the json file
+            for run_id, params in param_dict.items():
+                circuit_id = c.create_runner(params)
+
+        c.run_all()
+
+        print("Empty params:", database.get_conditional_data())
+        print("Reg spsas: ", database.get_conditional_data(spsas={"spsa_alpha": 0.5, "spsa_gamma": 0.101, "spsa_c": 0.2, "spsa_A": 2, "spsa_a1": 0.2}))
+        print("Bad spsas: ", database.get_conditional_data(spsas={"spsa_alpha": 0.9, "spsa_gamma": 0.7, "spsa_c": 0.3, "spsa_A": 2, "spsa_a1": 0.2}))
+        print("Partial spsas: ", database.get_conditional_data(spsas={"spsa_alpha": None, "spsa_gamma": 0.101, "spsa_c": None, "spsa_A": 2, "spsa_a1": None}))
+        print("Partial spsas and all else: ", database.get_conditional_data(spsas={"spsa_alpha": None, "spsa_gamma": 0.101, "spsa_c": None, "spsa_A": 2, "spsa_a1": None}, 
+                                            feature_keys=['f_lept3_pt', 'f_lept4_pt', 'f_Z1mass'], test_accuracy_gt=0.5, test_accuracy_lt=0.95, 
+                                            data_sizes=(80, 40, 80), misc_params={"is_local_simulator": True, "use_pca": False, "seed": 123, "batch_size": None, "n_epochs": None,  "num_layers": None, "obs": "XXI"}))
+        # This is important, otherwise the database will not be saved
+        database.close()
+
+        # It is fine to do this because the params are saved in the output files
+        os.remove("params.json")
+
+        print(f"Total time: {time.time() - start}")
+
 
     # Runs interface, made so we can multithread
     def run_interface():
         root = tk.Tk()
-        app = Interface(root, database, request_queue, update_queue)
+        inter = Interface(root, request_queue, update_queue)
         root.mainloop()
 
     interface_thread = threading.Thread(target=run_interface)
     interface_thread.daemon = True  # make interface thread a daemon
     interface_thread.start()
+
+    db_thread = threading.Thread(target=run_database)
+    db_thread.daemon = True  # make interface thread a daemon
+    db_thread.start()
     
-    
-  
-
-    start = time.time()
-
-    with open("params.json", "r") as f:
-        param_dict = json.load(f)
-
-        # Create a runner for each set of parameters in the json file
-        for run_id, params in param_dict.items():
-            circuit_id = c.create_runner(params)
-
-    c.run_all()
-
-    print("Empty params:", database.get_conditional_data())
-    print("Reg spsas: ", database.get_conditional_data(spsas={"spsa_alpha": 0.5, "spsa_gamma": 0.101, "spsa_c": 0.2, "spsa_A": 2, "spsa_a1": 0.2}))
-    print("Bad spsas: ", database.get_conditional_data(spsas={"spsa_alpha": 0.9, "spsa_gamma": 0.7, "spsa_c": 0.3, "spsa_A": 2, "spsa_a1": 0.2}))
-    print("Partial spsas: ", database.get_conditional_data(spsas={"spsa_alpha": None, "spsa_gamma": 0.101, "spsa_c": None, "spsa_A": 2, "spsa_a1": None}))
-    print("Partial spsas and all else: ", database.get_conditional_data(spsas={"spsa_alpha": None, "spsa_gamma": 0.101, "spsa_c": None, "spsa_A": 2, "spsa_a1": None}, 
-                                        feature_keys=['f_lept3_pt', 'f_lept4_pt', 'f_Z1mass'], test_accuracy_gt=0.5, test_accuracy_lt=0.95, 
-                                        data_sizes=(80, 40, 80), misc_params={"is_local_simulator": True, "use_pca": False, "seed": 123, "batch_size": None, "n_epochs": None,  "num_layers": None, "obs": "XXI"}))
-    # This is important, otherwise the database will not be saved
-    database.close()
-
-    # It is fine to do this because the params are saved in the output files
-    os.remove("params.json")
-
-    print(f"Total time: {time.time() - start}")
+    try:
+        while True:
+            time.sleep(1)
+    except KeyboardInterrupt:
+        print("Application interrupted. Exiting...")
 
 
 if __name__ == "__main__":
