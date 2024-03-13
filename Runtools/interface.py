@@ -4,9 +4,10 @@ from tkinter import ttk, filedialog
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 class Interface:
-    def __init__(self, master, database, queue):
+    def __init__(self, master, database, request_queue, update_queue):
         # threadsafe queue for the database to give data updates To
-        self.queue = queue
+        self.request_data_queue = queue
+        self.receiving_queue = update_queue
         self.db = database
         
         self.left_frame = tk.Frame(master, width=200, height=400)
