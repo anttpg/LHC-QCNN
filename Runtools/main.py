@@ -6,6 +6,7 @@ import time
 
 from queue import Queue
 import threading
+import tkinter as tk
 from controller import Controller
 from database import Database
 from interface import Interface 
@@ -68,8 +69,7 @@ def create_param_configs():
 
 
 # Only call when you want to optimize the hyperparameters of a network
-def optimize_hyperparams(param_dict ):
-
+def optimize_hyperparams(param_dict):
     return 0
 
 

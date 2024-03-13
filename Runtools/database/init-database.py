@@ -116,7 +116,7 @@ c.execute('''CREATE TABLE outputs (
     FOREIGN KEY (spsas_id) REFERENCES spsas(id),
     FOREIGN KEY (feature_keys_id) REFERENCES feature_keys(id),
     FOREIGN KEY (data_sizes_id) REFERENCES data_sizes(id),
-    FOREIGN KEY (misc_params_id) REFERENCES misc_params(id),
+    FOREIGN KEY (misc_params_id) REFERENCES misc_params(id)
 )''')
     # No point in doing this, just use the id of the outputs table to query the other tables (joining creates a new data row for every test data row)
     # FOREIGN KEY (test_data_id) REFERENCES test_data(circuit_id),
