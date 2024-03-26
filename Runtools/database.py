@@ -12,7 +12,7 @@ import time
 
 class Database:
 
-    def __init__(self, filepath, request_queue, output_queue):
+    def __init__(self, filepath, request_queue, output_queue, use_interface):
         self.request_queue = request_queue
         self.output_queue = output_queue
     
@@ -26,8 +26,12 @@ class Database:
             exit(0)
 
         self.cursor = self.conn.cursor()
-        print("! Call process requests !")
-        self.process_requests()
+
+
+
+        if use_interface:
+            print("! Call process requests !")
+            self.process_requests()
 
 
 
@@ -320,8 +324,8 @@ class Database:
 
 
 
-    # Callback function to be called by controller every time it completes a runner (ie like run_one completes), signal to the database that new 
-    # Data has appeared, allowing us to update the graphs, AND  SOMEHOW SAVE DATA
+
+
     def update_callback(self, circuit_id, new_data):
         """
         This function updates the database with the new data for the circuit with the given circuit_id.
@@ -341,6 +345,12 @@ class Database:
         for i in range(len(new_data.test_labels)):
             self.cursor.execute("INSERT INTO test_data (circuit_id, test_label, test_prob, test_pred) VALUES (?, ?, ?, ?)", 
                                 (circuit_id, int(new_data.test_labels[i]), new_data.test_prob[i], new_data.test_pred[i]))
+
+        # Add all weights during each iteration to the database with each entry corresponding to the new id (all entries with this id represent the weights for this run)
+        for epoch in new_data.weights:
+            for i in range(len(new_data.weights[epoch])):
+                self.cursor.execute("INSERT INTO parameter_weights (circuit_id, epoch, batch, w1, w2, w3, w4, w5, w6, w7, w8, w9, w10, w11, w12, w13, w14, w15) \
+                                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (circuit_id, epoch, i+1, *new_data.weights[epoch][i]))
 
         # Update the outputs table with the new results
         self.cursor.execute("UPDATE outputs SET cost = ?, test_accuracy = ?, test_data_id = ?, valid_loss_id = ?, run_time = ? WHERE id = ?",

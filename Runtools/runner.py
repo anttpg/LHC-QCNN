@@ -26,15 +26,18 @@ class Runner:
             self.cost = None
             self.test_accuracy = None
 
+            self.weights = None
+
             self.run_time = None
 
-        def set_run_data(self, labels, prob, pred, valid_loss, cost, test_accuracy, run_time):
+        def set_run_data(self, labels, prob, pred, valid_loss, cost, test_accuracy, weights, run_time):
             self.test_labels = labels
             self.test_prob = prob
             self.test_pred = pred
             self.valid_loss = valid_loss
             self.cost = cost
             self.test_accuracy = test_accuracy
+            self.weights = weights
             self.run_time = run_time
 
 

@@ -1,7 +1,7 @@
 import sqlite3
 import os
 
-os.chdir("./Runtools/database")
+# os.chdir("./Runtools/database")
 conn = sqlite3.connect('database.db')
 
 c = conn.cursor()
@@ -81,7 +81,7 @@ c.execute('''CREATE TABLE misc_params (
 # All of those rows should have the same circuit_id (id must be unique). The id of the test data should be used as the foreign key 
 # for your new outputs table entry. The id will be how we keep track of which test data belongs to which outputs.
 c.execute('''CREATE TABLE test_data (
-    id INTEGER PRIMARY KEY,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
     circuit_id INTEGER,
     test_label INTEGER,
     test_prob FLOAT,
@@ -93,10 +93,37 @@ c.execute('''CREATE TABLE test_data (
 # The id of the losses should be used as the foreign key for your new outputs table entry.
 # The id will be how we keep track of which loss data belongs to which outputs.
 c.execute('''CREATE TABLE valid_loss (
-    id INTEGER PRIMARY KEY,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
     circuit_id INTEGER,
     valid_loss FLOAT
 )''')
+
+
+# THE LENGTH OF THIS WILL NEED TO BE CHANGED BASED ON THE CIRCUIT THAT IT IS BEING USED FOR
+# epoch == 0 will be the initial weights
+c.execute('''CREATE TABLE parameter_weights (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    circuit_id INTEGER,
+    epoch INTEGER,
+    batch INTEGER,
+    w1 FLOAT,
+    w2 FLOAT,
+    w3 FLOAT,
+    w4 FLOAT,
+    w5 FLOAT,
+    w6 FLOAT,
+    w7 FLOAT,
+    w8 FLOAT,
+    w9 FLOAT,
+    w10 FLOAT,
+    w11 FLOAT,
+    w12 FLOAT,
+    w13 FLOAT,
+    w14 FLOAT,
+    w15 FLOAT
+)''')
+
+
 
 # This will be the main database table. It will contain all of the outputs from the runs.
 # It will also contain references to the other tables so that we can keep track of which outputs belong to which parameters.
