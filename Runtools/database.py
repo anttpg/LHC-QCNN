@@ -490,18 +490,22 @@ class Database:
         try:
             while True:
                 # Try to get an update from the queue, but don't block
-                print("Checking for requests")
+                # print("Checking for requests")
                 (request_x, request_y) = self.request_queue.get(block=False)
                 print("Request recieved, gathering data")
 
-                x_data = self.get_data_circuit_id(1)[request_x]
-                y_data = range(1, len(x_data))
+                # print(request_x)
+                # print(request_y)
+                x_data = self.get_data_circuit_id(request_y)[request_x]
+                y_data = range(0, len(x_data))
                 # Put the data in the queue 
                 self.output_queue.put((request_x, request_y, x_data, y_data))
                 print("Added data to queue")
                 self.request_queue.task_done()
         except queue.Empty:
             pass
+        except Exception:
+            print("Error processing request.")
 
         time.sleep(1)
         self.process_requests()

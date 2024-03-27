@@ -81,11 +81,15 @@ def main():
 
     request_queue = Queue()
     update_queue = Queue()
+    user_queue = Queue()
 
 
     def run_database():
         database = Database(DATABASE_PATH, request_queue, update_queue)
-        c = Controller(database)
+
+
+    def run_controller():
+        c = Controller(database, user_queue)
 
         start = time.time()
 
@@ -112,12 +116,12 @@ def main():
         os.remove("params.json")
 
         print(f"Total time: {time.time() - start}")
-
+        
 
     # Runs interface, made so we can multithread
     def run_interface():
         root = tk.Tk()
-        inter = Interface(root, request_queue, update_queue)
+        inter = Interface(root, request_queue, update_queue, user_queue)
         root.mainloop()
 
     interface_thread = threading.Thread(target=run_interface)

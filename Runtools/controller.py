@@ -11,7 +11,8 @@ from qiskit.circuit import ParameterVector
 
 
 class Controller:
-    def __init__(self, database):
+    def __init__(self, database, user_queue):
+        self.user_queue = user_queue
         self.runner_queue = deque()
         self.database = database
 
@@ -52,6 +53,14 @@ class Controller:
 
 
     def run_all(self):
+        # try:
+        #     while True:
+        #         runner = self.user_queue.get(block=False)
+        #         results.append(self.run_one())
+
+        # except queue.Empty:
+        #     pass
+
         results = []
         while bool(self.runner_queue): # While not empty
             results.append(self.run_one())
