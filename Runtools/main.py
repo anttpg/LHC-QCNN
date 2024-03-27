@@ -48,23 +48,29 @@ def create_param_configs():
     for i in range(1):
         param_dict[i] = {
         "n_qubits": 3,
-        "n_layers": 5,
+        "n_layers": 2,
         "batch_size": 2,
         "n_epochs": 1,
+        #############
+        # For circuit 2
+        "n_rots": 2,
+        "final_rotation_layer": True,
+        ############
         "train_data_size": 80,
         "valid_data_size": 40,
         "test_data_size": 80,
         "is_local_simulator": True,
-        "spsa_alpha": 0.5 + random.uniform(-0.015, 0.015) if i == 1 else 0.5,
-        "spsa_gamma": 0.101 + random.uniform(-0.01, 0.01) if i == 1 else 0.101,
-        "spsa_c": 0.2 + random.uniform(-0.01, 0.015) if i == 1 else 0.2,
-        "spsa_A": 2 + random.uniform(-0.025, 0.025) if i == 1 else 2,
-        "spsa_a1": 0.2 + random.uniform(-0.01, 0.015) if i == 1 else 0.2,
+        "spsa_alpha": 0.5 + random.uniform(-0.4, 0.5) if i != 0 else 0.5,
+        "spsa_gamma": 0.101 + random.uniform(-0.03, 0.03) if i != 0 else 0.101,
+        "spsa_c": 0.2 + random.uniform(-0.15, 0.3) if i != 0 else 0.2,
+        "spsa_A": 2 + random.uniform(-0.5, 0.5) if i != 0 else 2,
+        "spsa_a1": 0.2 + random.uniform(-0.15, 0.3) if i != 0 else 0.2,
         "use_pca": False,
         "seed": 123,
         "training_feature_keys": combinations[i if i != 1 else 0],
         "num_features": 3,
-        "obs": "XXI"
+        # IXX for circuit 2, XXI for circuit 1
+        "obs": "IXX"
     }
 
     with open("params.json", "w") as f:

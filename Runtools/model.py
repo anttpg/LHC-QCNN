@@ -27,7 +27,7 @@ def run(params, data, qc_template, results):
     """
 
     # weights_init = 0.5 * np.random.randn(num_layers, n_qubits, requires_grad=True)
-    weights_init = 0.5 * np.random.randn(params.num_layers , params.n_qubits)
+    weights_init = 0.5 * np.random.randn(params.n_params)
     weights_init = weights_init.flatten()
 
 

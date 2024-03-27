@@ -45,7 +45,7 @@ class Runner:
 
 
     def start(self):
-        circuit = self.create_circuit()
+        circuit = self.create_circuit2()
         # Returns the Results object that was passed to it
         # The object will be updated with the results of the run
         return run(self.params, self.data, circuit, self.Results())
@@ -99,5 +99,34 @@ class Runner:
 
 
         # qc_template.measure_all()
+
+        return qc_template
+
+
+
+    def create_circuit2(self):
+        n_qubits = self.params.n_qubits  
+        par_inputs = self.params.par_inputs
+        par_weights = self.params.par_weights
+
+        # BUILD CIRCUIT
+        qc_template = QuantumCircuit(n_qubits)
+
+        for i in range(n_qubits):
+            qc_template.rx(par_inputs[i], i)
+
+        for i in range(self.params.num_layers):
+            for j in range(n_qubits):
+                qc_template.ry(par_weights[self.params.n_par_per_layer*i + self.params.n_rots*j + 0], j)
+                qc_template.rz(par_weights[self.params.n_par_per_layer*i + self.params.n_rots*j + 1], j)
+                # qc.ry(par_weights[n_par_per_layer*i + n_rots*j + 2], j)
+            for j in range(n_qubits-1, 0, -1):
+                qc_template.cx(j-1, j)
+
+        if self.params.final_rotation_layer:
+            for j in range(n_qubits):
+                qc_template.ry(par_weights[self.params.n_par_per_layer*self.params.num_layers + self.params.n_rots*j + 0], j)
+                qc_template.rz(par_weights[self.params.n_par_per_layer*self.params.num_layers + self.params.n_rots*j + 1], j)
+
 
         return qc_template

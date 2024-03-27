@@ -120,7 +120,10 @@ c.execute('''CREATE TABLE parameter_weights (
     w12 FLOAT,
     w13 FLOAT,
     w14 FLOAT,
-    w15 FLOAT
+    w15 FLOAT,
+    w16 FLOAT,
+    w17 FLOAT,
+    w18 FLOAT
 )''')
 
 

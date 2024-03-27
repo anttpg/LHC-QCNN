@@ -86,11 +86,18 @@ class Controller:
 
             self.n_qubits = raw_params["n_qubits"]
             self.num_layers = raw_params["n_layers"]
+            try:
+                self.n_rots = raw_params["n_rots"]
+                self.final_rotation_layer = raw_params["final_rotation_layer"]
+                self.n_par_per_layer = self.n_qubits * self.n_rots
+                self.n_params = self.n_rots * self.n_qubits * (self.num_layers + 1) if self.final_rotation_layer else self.n_qubits*self.num_layers*self.n_rots
+            except KeyError:
+                self.n_params = self.n_qubits * self.num_layers
             # For database
             self.obs_text = raw_params["obs"]
             self.obs = SparsePauliOp(raw_params["obs"])
             self.par_inputs = ParameterVector("input", self.n_qubits)
-            self.par_weights = ParameterVector("weights", self.num_layers * self.n_qubits)
+            self.par_weights = ParameterVector("weights", self.n_params)
 
             self.spsa_alpha = raw_params["spsa_alpha"] 
             self.spsa_gamma = raw_params["spsa_gamma"] 
