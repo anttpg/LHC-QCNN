@@ -12,7 +12,9 @@ from controller import Controller
 from database import Database
 from interface import Interface 
 
-DATABASE_PATH = "./Runtools/database/database.db"
+# DATABASE_PATH = "./Runtools/database/database.db"
+DATABASE_PATH = "./database/database.db"
+USE_INTERFACE = False
 
 #from multiprocessing import Pool TODO Implement multiprocessing 
 
@@ -43,7 +45,7 @@ def create_param_configs():
     # for i in range(len(combinations)):
         # for j in range(runs_per_permutation):
             # param_dict[j + (i*runs_per_permutation)] = {
-    for i in range(3):
+    for i in range(1):
         param_dict[i] = {
         "n_qubits": 3,
         "n_layers": 5,
@@ -84,7 +86,10 @@ def main():
 
 
     def run_database():
-        database = Database(DATABASE_PATH, request_queue, update_queue)
+        if USE_INTERFACE:
+            database = Database(DATABASE_PATH, request_queue, update_queue, True)
+        else:
+            database = Database(DATABASE_PATH, None, None, False)
         c = Controller(database)
 
         start = time.time()
@@ -98,13 +103,13 @@ def main():
 
         c.run_all()
 
-        print("Empty params:", database.get_conditional_data())
-        print("Reg spsas: ", database.get_conditional_data(spsas={"spsa_alpha": 0.5, "spsa_gamma": 0.101, "spsa_c": 0.2, "spsa_A": 2, "spsa_a1": 0.2}))
-        print("Bad spsas: ", database.get_conditional_data(spsas={"spsa_alpha": 0.9, "spsa_gamma": 0.7, "spsa_c": 0.3, "spsa_A": 2, "spsa_a1": 0.2}))
-        print("Partial spsas: ", database.get_conditional_data(spsas={"spsa_alpha": None, "spsa_gamma": 0.101, "spsa_c": None, "spsa_A": 2, "spsa_a1": None}))
-        print("Partial spsas and all else: ", database.get_conditional_data(spsas={"spsa_alpha": None, "spsa_gamma": 0.101, "spsa_c": None, "spsa_A": 2, "spsa_a1": None}, 
-                                            feature_keys=['f_lept3_pt', 'f_lept4_pt', 'f_Z1mass'], test_accuracy_gt=0.5, test_accuracy_lt=0.95, 
-                                            data_sizes=(80, 40, 80), misc_params={"is_local_simulator": True, "use_pca": False, "seed": 123, "batch_size": None, "n_epochs": None,  "num_layers": None, "obs": "XXI"}))
+        # print("Empty params:", database.get_conditional_data())
+        # print("Reg spsas: ", database.get_conditional_data(spsas={"spsa_alpha": 0.5, "spsa_gamma": 0.101, "spsa_c": 0.2, "spsa_A": 2, "spsa_a1": 0.2}))
+        # print("Bad spsas: ", database.get_conditional_data(spsas={"spsa_alpha": 0.9, "spsa_gamma": 0.7, "spsa_c": 0.3, "spsa_A": 2, "spsa_a1": 0.2}))
+        # print("Partial spsas: ", database.get_conditional_data(spsas={"spsa_alpha": None, "spsa_gamma": 0.101, "spsa_c": None, "spsa_A": 2, "spsa_a1": None}))
+        # print("Partial spsas and all else: ", database.get_conditional_data(spsas={"spsa_alpha": None, "spsa_gamma": 0.101, "spsa_c": None, "spsa_A": 2, "spsa_a1": None}, 
+        #                                     feature_keys=['f_lept3_pt', 'f_lept4_pt', 'f_Z1mass'], test_accuracy_gt=0.5, test_accuracy_lt=0.95, 
+        #                                     data_sizes=(80, 40, 80), misc_params={"is_local_simulator": True, "use_pca": False, "seed": 123, "batch_size": None, "n_epochs": None,  "num_layers": None, "obs": "XXI"}))
         # This is important, otherwise the database will not be saved
         database.close()
 
@@ -120,19 +125,29 @@ def main():
         inter = Interface(root, request_queue, update_queue)
         root.mainloop()
 
-    interface_thread = threading.Thread(target=run_interface)
-    interface_thread.daemon = True  # make interface thread a daemon
-    interface_thread.start()
 
-    db_thread = threading.Thread(target=run_database)
-    db_thread.daemon = True  # make interface thread a daemon
-    db_thread.start()
-    
-    try:
-        while True:
-            time.sleep(1)
-    except KeyboardInterrupt:
-        print("Application interrupted. Exiting...")
+
+
+
+
+    if USE_INTERFACE:
+
+        interface_thread = threading.Thread(target=run_interface)
+        interface_thread.daemon = True  # make interface thread a daemon
+        interface_thread.start()
+
+        db_thread = threading.Thread(target=run_database)
+        db_thread.daemon = True  # make interface thread a daemon
+        db_thread.start()
+        
+        try:
+            while True:
+                time.sleep(1)
+        except KeyboardInterrupt:
+            print("Application interrupted. Exiting...")
+
+    else:
+        run_database()
 
 
 if __name__ == "__main__":

@@ -55,6 +55,10 @@ def run(params, data, qc_template, results):
     n_batches = num_train // params.batch_size
 
 
+    # For saving weights
+    weights_dict = {0: [weights_init]}
+
+
     # losses = []
     times = []
     losses_valid = []
@@ -69,7 +73,9 @@ def run(params, data, qc_template, results):
     for i in range(params.n_epochs):
         indices = list(range(num_train))
         np.random.shuffle(indices)
-        
+
+        weights_dict[i+1] = []
+
         for j in range(n_batches):
             # Update the weights by one optimizer step
             batch_index = indices[j*params.batch_size:(j+1)*params.batch_size]
@@ -109,6 +115,8 @@ def run(params, data, qc_template, results):
 
             weights -= spsa_ak * grad
 
+            weights_dict[i+1].append(weights.copy())
+            
             ##np.savez(os.path.join(save_folder, f"weights_{i}_{j}"), weights=weights) TEMP DO NOT SAVE
 
             times.append(time.time())
@@ -163,7 +171,7 @@ def run(params, data, qc_template, results):
 
 
     # Save the results to the results object and return it
-    results.set_run_data(data.test_labels, probs_test, preds_test, losses_valid, cost_test, acc_test, elapsed)
+    results.set_run_data(data.test_labels, probs_test, preds_test, losses_valid, cost_test, acc_test, weights_dict, elapsed)
     return results
 
 
