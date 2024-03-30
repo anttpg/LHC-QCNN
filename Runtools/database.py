@@ -350,16 +350,17 @@ class Database:
         for epoch in new_data.weights:
             for i in range(len(new_data.weights[epoch])):
                 self.cursor.execute("INSERT INTO parameter_weights (circuit_id, w1, w2, w3, w4, w5, w6, w7, w8, w9, w10, w11, w12, w13, w14, w15, w16, w17, w18) \
-                                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (circuit_id, epoch, i+1, *new_data.weights[epoch][i]))
+                                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (circuit_id, *new_data.weights[epoch][i]))
 
         # Add all log data to the database with each entry corresponding to the new id (all entries with this id represent the log data for this run)
         for epoch in new_data.log:
-            self.cursor.execute("INSERT INTO log (circuit_id, epoch, iteration, iteration_time, cost_val, acc_val) VALUES (?, ?, ?, ?, ?, ?)", 
-                                (circuit_id, epoch, new_data.log[epoch][0], new_data.log[epoch][1], new_data.log[epoch][2], new_data.log[epoch][3]))
+            for iteration in new_data.log[epoch]:
+                self.cursor.execute("INSERT INTO log (circuit_id, epoch, iteration, iteration_time, cost_val, acc_val) VALUES (?, ?, ?, ?, ?, ?)", 
+                                    (circuit_id, epoch, iteration[0], iteration[1], iteration[2], iteration[3]))
 
         # Update the outputs table with the new results
-        self.cursor.execute("UPDATE outputs SET cost = ?, test_accuracy = ?, test_data_id = ?, valid_loss_id = ?, run_time = ? WHERE id = ?",
-                            (new_data.cost, new_data.test_accuracy, circuit_id, circuit_id, new_data.run_time, circuit_id))
+        self.cursor.execute("UPDATE outputs SET cost = ?, test_accuracy = ?, run_time = ? WHERE id = ?",
+                            (new_data.cost, new_data.test_accuracy, new_data.run_time, circuit_id))
 
         # Commit the changes to the database
         self.conn.commit()

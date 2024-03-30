@@ -81,7 +81,7 @@ def run(params, data, qc_template, results):
 
 
     if NOISE_MODEL == 'ionq':
-        provider = IonQProvider()
+        provider = IonQProvider(token='97T24lycrjE9NfDVN7xpenwQSEtS5p7B')
         backend = provider.get_backend("ionq_simulator")
         backend.set_options(noise_model="harmony") 
         estimator = BackendEstimator(backend)
@@ -165,7 +165,7 @@ def run(params, data, qc_template, results):
             if params.is_local_simulator:
                 message += f" Cost val: {cost_valid:0.3f} | Acc val:  {acc_valid:0.3f}"
 
-            log[i+1].append([(j+1)/n_batches, delta_t, cost_valid, acc_valid])
+            log[i+1].append([j+1, delta_t, cost_valid, acc_valid])
             print(message)
 
 
