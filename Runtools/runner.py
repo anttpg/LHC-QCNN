@@ -28,9 +28,11 @@ class Runner:
 
             self.weights = None
 
+            self.log = None
+
             self.run_time = None
 
-        def set_run_data(self, labels, prob, pred, valid_loss, cost, test_accuracy, weights, run_time):
+        def set_run_data(self, labels, prob, pred, valid_loss, cost, test_accuracy, weights, run_time, log):
             self.test_labels = labels
             self.test_prob = prob
             self.test_pred = pred
@@ -39,6 +41,7 @@ class Runner:
             self.test_accuracy = test_accuracy
             self.weights = weights
             self.run_time = run_time
+            self.log = log
 
 
 

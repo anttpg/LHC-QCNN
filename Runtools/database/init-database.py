@@ -104,8 +104,6 @@ c.execute('''CREATE TABLE valid_loss (
 c.execute('''CREATE TABLE parameter_weights (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     circuit_id INTEGER,
-    epoch INTEGER,
-    batch INTEGER,
     w1 FLOAT,
     w2 FLOAT,
     w3 FLOAT,
@@ -128,6 +126,22 @@ c.execute('''CREATE TABLE parameter_weights (
 
 
 
+
+c.execute('''CREATE TABLE log (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    circuit_id INTEGER,
+    epoch INTEGER,
+    iteration INTEGER,
+    iteration_time FLOAT,
+    cost_val FLOAT,
+    acc_val FLOAT,
+    FOREIGN KEY (circuit_id) REFERENCES parameter_weights(circuit_id)
+)''')
+
+
+
+
+
 # This will be the main database table. It will contain all of the outputs from the runs.
 # It will also contain references to the other tables so that we can keep track of which outputs belong to which parameters.
 # When querying for data to analyze, we will be able to join the tables on the foreign keys to get all of the data we need.
@@ -137,8 +151,6 @@ c.execute('''CREATE TABLE outputs (
     feature_keys_id INTEGER,
     data_sizes_id INTEGER,
     misc_params_id INTEGER,
-    test_data_id INTEGER,
-    valid_loss_id INTEGER,
     cost FLOAT,
     test_accuracy FLOAT,
     run_time FLOAT,
@@ -146,8 +158,9 @@ c.execute('''CREATE TABLE outputs (
     FOREIGN KEY (spsas_id) REFERENCES spsas(id),
     FOREIGN KEY (feature_keys_id) REFERENCES feature_keys(id),
     FOREIGN KEY (data_sizes_id) REFERENCES data_sizes(id),
-    FOREIGN KEY (misc_params_id) REFERENCES misc_params(id)
+    FOREIGN KEY (misc_params_id) REFERENCES misc_params(id),
+    FOREIGN KEY (id) REFERENCES log(circuit_id)
+    FOREIGN KEY (id) REFERENCES test_data(circuit_id),
+    FOREIGN KEY (id) REFERENCES valid_loss(circuit_id)
 )''')
     # No point in doing this, just use the id of the outputs table to query the other tables (joining creates a new data row for every test data row)
-    # FOREIGN KEY (test_data_id) REFERENCES test_data(circuit_id),
-    # FOREIGN KEY (valid_loss_id) REFERENCES valid_loss(circuit_id)

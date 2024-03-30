@@ -1,0 +1,28 @@
+{
+    "0": {
+        "n_qubits": 3,
+        "n_layers": 2,
+        "batch_size": 2,
+        "n_epochs": 1,
+        "n_rots": 2,
+        "final_rotation_layer": true,
+        "train_data_size": 200,
+        "valid_data_size": 70,
+        "test_data_size": 100,
+        "is_local_simulator": true,
+        "spsa_alpha": 0.5,
+        "spsa_gamma": 0.101,
+        "spsa_c": 0.2,
+        "spsa_A": 2,
+        "spsa_a1": 0.2,
+        "use_pca": false,
+        "seed": 123,
+        "training_feature_keys": [
+            "f_mass4l",
+            "f_Z1mass",
+            "f_Z2mass"
+        ],
+        "num_features": 3,
+        "obs": "IXX"
+    }
+}

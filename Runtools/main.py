@@ -24,9 +24,10 @@ USE_INTERFACE = False
 def create_param_configs():
     param_dict = {}
     # USE N FEATURE KEYS GIVEN N QUBITS
-    training_feature_keys = ['f_lept3_pt', 'f_lept4_pt', 'f_Z1mass', 'f_angle_costheta2', 'f_pt4l', 'f_eta4l', 'f_jet1_pt', 'f_jet1_e']
-    runs_per_permutation = 5
-    combinations = list(itertools.combinations(training_feature_keys, 3))
+    # training_feature_keys = ['f_lept3_pt', 'f_lept4_pt', 'f_Z1mass', 'f_angle_costheta2', 'f_pt4l', 'f_eta4l', 'f_jet1_pt', 'f_jet1_e']
+    training_feature_keys = ['f_mass4l', 'f_Z1mass', 'f_Z2mass']
+    # runs_per_permutation = 5
+    # combinations = list(itertools.combinations(training_feature_keys, 3))
 
     """
     maxiter (int) – the maximum number of iterations expected to be performed. Used to determine A, if A is not supplied, otherwise ignored.
@@ -56,18 +57,18 @@ def create_param_configs():
         "n_rots": 2,
         "final_rotation_layer": True,
         ############
-        "train_data_size": 80,
-        "valid_data_size": 40,
-        "test_data_size": 80,
+        "train_data_size": 200,
+        "valid_data_size": 70,
+        "test_data_size": 100,
         "is_local_simulator": True,
-        "spsa_alpha": 0.5 + random.uniform(-0.4, 0.5) if i != 0 else 0.5,
-        "spsa_gamma": 0.101 + random.uniform(-0.03, 0.03) if i != 0 else 0.101,
-        "spsa_c": 0.2 + random.uniform(-0.15, 0.3) if i != 0 else 0.2,
-        "spsa_A": 2 + random.uniform(-0.5, 0.5) if i != 0 else 2,
-        "spsa_a1": 0.2 + random.uniform(-0.15, 0.3) if i != 0 else 0.2,
+        "spsa_alpha": 0.5 + random.uniform(-0.05, 0.05) if i != 0 else 0.5,
+        "spsa_gamma": 0.101 + random.uniform(-0.003, 0.003) if i != 0 else 0.101,
+        "spsa_c": 0.2 + random.uniform(-0.015, 0.03) if i != 0 else 0.2,
+        "spsa_A": 2 + random.uniform(-0.05, 0.05) if i != 0 else 2,
+        "spsa_a1": 0.2 + random.uniform(-0.015, 0.03) if i != 0 else 0.2,
         "use_pca": False,
         "seed": 123,
-        "training_feature_keys": combinations[i if i != 1 else 0],
+        "training_feature_keys": training_feature_keys,
         "num_features": 3,
         # IXX for circuit 2, XXI for circuit 1
         "obs": "IXX"

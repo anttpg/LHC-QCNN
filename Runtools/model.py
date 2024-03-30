@@ -2,7 +2,10 @@
 import numpy as np
 from qiskit_aer.primitives import Sampler, Estimator
 # from qiskit.primitives import Estimator
-
+from qiskit_aer.noise import NoiseModel
+from qiskit_ibm_provider import IBMProvider
+from qiskit_ionq import IonQProvider
+from qiskit.primitives import BackendEstimator
 
 
 import time
@@ -11,6 +14,11 @@ from sklearn.metrics import confusion_matrix
 from sklearn.metrics import ConfusionMatrixDisplay
 
 import Modules.LHC_QML_module as lqm
+
+
+
+# Set to ionq for ionq noise model, ibm for ibm noise model, and None for no noise model
+NOISE_MODEL = 'ionq'
 
 
 
@@ -59,6 +67,9 @@ def run(params, data, qc_template, results):
     weights_dict = {0: [weights_init]}
 
 
+    log = {}
+
+
     # losses = []
     times = []
     losses_valid = []
@@ -68,13 +79,27 @@ def run(params, data, qc_template, results):
 
     spsa_k = 0
 
-    estimator = Estimator()
+
+    if NOISE_MODEL == 'ionq':
+        provider = IonQProvider()
+        backend = provider.get_backend("ionq_simulator")
+        backend.set_options(noise_model="harmony") 
+        estimator = BackendEstimator(backend)
+    elif NOISE_MODEL == 'ibm':
+        provider = IBMProvider()
+        backend = provider.get_backend('ibm_brisbane')
+        noise_model = NoiseModel.from_backend(backend)
+        estimator = Estimator(noise_model)
+    else:
+        estimator = Estimator()
+
 
     for i in range(params.n_epochs):
         indices = list(range(num_train))
         np.random.shuffle(indices)
 
         weights_dict[i+1] = []
+        log[i+1] = []
 
         for j in range(n_batches):
             # Update the weights by one optimizer step
@@ -136,10 +161,11 @@ def run(params, data, qc_template, results):
 
                 losses_valid.append(cost_valid)
         
-            # TODO: Change this eventually to a logging system instead of print
             message = f"Epoch: {i+1:4d} | Iter: {j+1:4d}/{n_batches} | Time: {delta_t:0.2f} |" 
             if params.is_local_simulator:
                 message += f" Cost val: {cost_valid:0.3f} | Acc val:  {acc_valid:0.3f}"
+
+            log[i+1].append([(j+1)/n_batches, delta_t, cost_valid, acc_valid])
             print(message)
 
 
@@ -171,7 +197,7 @@ def run(params, data, qc_template, results):
 
 
     # Save the results to the results object and return it
-    results.set_run_data(data.test_labels, probs_test, preds_test, losses_valid, cost_test, acc_test, weights_dict, elapsed)
+    results.set_run_data(data.test_labels, probs_test, preds_test, losses_valid, cost_test, acc_test, weights_dict, elapsed, log)
     return results
 
 

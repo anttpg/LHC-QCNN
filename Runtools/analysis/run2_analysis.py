@@ -21,6 +21,7 @@ db1 = Database(DATABASE_PATH2, None, None, False)
 # Eventually try implementing trainable coefficient for parameters
 # Write code to show discrimination for best hyperparameter combinations
 # Find moments (mean, variance, skew) of test accuracy histograms
+# Test same initial parameters and hyperparameters to see if they converge to the same values
 LAST_RUNS = db.get_conditional_data(feature_keys=['f_lept3_pt', 'f_lept4_pt', 'f_Z1mass'])
 C1 = db1.get_conditional_data(feature_keys=['f_lept3_pt', 'f_lept4_pt', 'f_Z1mass'])
 
